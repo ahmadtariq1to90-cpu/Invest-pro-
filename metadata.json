@@ -1,0 +1,5 @@
+{
+  "name": "Invest Pro",
+  "description": "A modern SaaS-style investment web application user panel with authentication, dashboard, investment system, deposit/withdrawal system, referral system, profile management, and settings.",
+  "requestFramePermissions": []
+}
