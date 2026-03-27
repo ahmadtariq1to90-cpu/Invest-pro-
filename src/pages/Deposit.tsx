@@ -183,7 +183,7 @@ export default function Deposit() {
               {/* Left Side: Instructions & Info */}
               <div className="lg:col-span-2 space-y-6 md:space-y-10">
                 <div>
-                  <h2 className="text-4xl md:text-5xl font-display font-black tracking-tighter leading-[0.9] mb-6">
+                  <h2 className="text-3xl md:text-5xl font-display font-black tracking-tighter leading-[0.9] mb-6">
                     ADD <br />
                     <span className="text-white/30">MONEY</span> <br />
                     NOW.

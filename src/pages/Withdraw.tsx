@@ -184,7 +184,7 @@ export default function Withdraw() {
               
               <p className="text-indigo-100/60 text-[10px] font-black uppercase tracking-[0.3em] mb-4">Available to Withdraw</p>
               <div className="flex items-baseline gap-2 md:gap-3">
-                <h2 className="text-5xl md:text-7xl font-display font-black text-white tracking-tighter">{balance.toLocaleString()}</h2>
+                <h2 className="text-3xl md:text-7xl font-display font-black text-white tracking-tighter">{balance.toLocaleString()}</h2>
                 <span className="text-lg md:text-xl font-medium text-white/40 uppercase tracking-widest">PKR</span>
               </div>
               

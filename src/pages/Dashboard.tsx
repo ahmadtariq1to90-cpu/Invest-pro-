@@ -349,8 +349,8 @@ export default function Dashboard() {
         >
           <div className="flex justify-between items-center mb-8">
             <div>
-              <h3 className="text-lg md:text-xl font-bold tracking-tight font-display">Daily Returns</h3>
-              <p className="text-xs text-white/40">7-day profit projection</p>
+              <h3 className="text-lg md:text-xl font-bold tracking-tight font-display">Profit Analytics</h3>
+              <p className="text-xs text-white/40">7-day performance projection</p>
             </div>
             <div className="w-10 h-10 glass rounded-xl flex items-center justify-center">
               <BarChart3 size={18} className="text-indigo-400" />
@@ -388,7 +388,7 @@ export default function Dashboard() {
               <div className="w-10 h-10 bg-violet-500/10 rounded-xl flex items-center justify-center border border-violet-500/20">
                 <PieChartIcon size={18} className="text-violet-400" />
               </div>
-              <h3 className="text-lg font-bold tracking-tight font-display">Portfolio</h3>
+              <h3 className="text-lg font-bold tracking-tight font-display">Asset Allocation</h3>
             </div>
             
             <div className="flex items-center gap-8">
@@ -433,7 +433,7 @@ export default function Dashboard() {
               <div className="w-10 h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center border border-emerald-500/20">
                 <Zap size={18} className="text-emerald-400" />
               </div>
-              <h3 className="text-lg font-bold tracking-tight font-display">Growth Goal</h3>
+              <h3 className="text-lg font-bold tracking-tight font-display">Yield Projection</h3>
             </div>
             
             <div className="space-y-6">
@@ -465,7 +465,7 @@ export default function Dashboard() {
         <div className="space-y-6">
           <div className="flex justify-between items-end">
             <div>
-              <p className="text-white/40 text-[10px] font-bold uppercase tracking-[0.3em] mb-1">History</p>
+              <p className="text-white/40 text-[10px] font-bold uppercase tracking-[0.3em] mb-1">Transaction Log</p>
               <h3 className="text-2xl font-bold tracking-tight font-display">Recent Activity</h3>
             </div>
             <div className="relative">
@@ -552,16 +552,6 @@ export default function Dashboard() {
           )}
         </div>
 
-        {/* Security Banner */}
-        <div className="bg-gradient-to-r from-indigo-500/10 to-violet-500/10 rounded-3xl p-6 border border-white/5 flex items-center gap-4">
-          <div className="w-12 h-12 glass rounded-2xl flex items-center justify-center flex-shrink-0">
-            <Shield className="text-indigo-400" size={24} />
-          </div>
-          <div>
-            <p className="text-sm font-bold">Secure Account Active</p>
-            <p className="text-xs text-white/40">Your account is protected by advanced security</p>
-          </div>
-        </div>
       </div>
 
       {/* Custom Styles for Marquee */}

@@ -133,7 +133,7 @@ export default function Landing() {
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: i * 0.1 }}
                   onClick={() => scrollToSection(link.id)} 
-                  className="text-5xl font-display font-black text-left text-white hover:text-indigo-500 transition-colors tracking-tighter"
+                  className="text-3xl font-display font-black text-left text-white hover:text-indigo-500 transition-colors tracking-tighter"
                 >
                   {link.name}
                 </motion.button>

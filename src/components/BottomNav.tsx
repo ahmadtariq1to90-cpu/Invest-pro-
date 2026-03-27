@@ -7,8 +7,8 @@ export default function BottomNav() {
   const navigate = useNavigate();
 
   return (
-    <div className="fixed bottom-8 left-1/2 -translate-x-1/2 w-[calc(100%-3rem)] max-w-[calc(28rem-3rem)] z-50">
-      <div className="bg-[#0a0a0a]/80 backdrop-blur-2xl border border-white/10 shadow-2xl rounded-[2.5rem] px-6 py-4 flex justify-between items-center relative overflow-hidden">
+    <div className="fixed bottom-6 left-1/2 -translate-x-1/2 w-[90%] max-w-md z-50">
+      <div className="bg-[#0a0a0a]/90 backdrop-blur-2xl border border-white/10 shadow-2xl rounded-3xl px-4 py-3 flex justify-between items-center relative overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-t from-white/5 to-transparent opacity-50 pointer-events-none"></div>
         
         <NavLink to="/app" end className={({ isActive }) => clsx("flex flex-col items-center gap-1.5 transition-all duration-300 relative z-10", isActive ? "text-white scale-110" : "text-white/40 hover:text-white/60")}>

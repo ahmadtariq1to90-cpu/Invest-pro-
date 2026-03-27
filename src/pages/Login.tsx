@@ -103,7 +103,7 @@ export default function Login() {
             </div>
           </div>
 
-          <h1 className="text-7xl font-display font-black tracking-tighter leading-[0.9] mb-10">
+          <h1 className="text-5xl md:text-7xl font-display font-black tracking-tighter leading-[0.9] mb-10">
             SECURE <br />
             <span className="text-white/30">INVESTMENT</span> <br />
             ACCESS.
