@@ -25,6 +25,7 @@ import Support from './pages/Support';
 import Terms from './pages/Terms';
 import Contact from './pages/Contact';
 import FAQ from './pages/FAQ';
+import About from './pages/About';
 import Notifications from './pages/Notifications';
 
 // Components
@@ -33,7 +34,12 @@ import ScrollToTop from './components/ScrollToTop';
 
 const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   const { user, loading } = useAuth();
-  if (loading) return <div className="min-h-screen flex items-center justify-center bg-gray-50 dark:bg-slate-950 text-slate-900 dark:text-white transition-colors duration-300">Loading...</div>;
+  if (loading) return (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-[#050505] text-white">
+      <div className="w-12 h-12 border-4 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin mb-4"></div>
+      <p className="text-[10px] font-bold uppercase tracking-[0.3em] text-white/40">Securing Session...</p>
+    </div>
+  );
   if (!user) return <Navigate to="/login" />;
   return <>{children}</>;
 };
@@ -52,6 +58,7 @@ export default function App() {
             <Route path="/terms" element={<Terms />} />
             <Route path="/contact" element={<Contact />} />
             <Route path="/faq" element={<FAQ />} />
+            <Route path="/about" element={<About />} />
 
             {/* Protected Routes */}
             <Route path="/app" element={<ProtectedRoute><Layout /></ProtectedRoute>}>

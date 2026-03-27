@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-import { motion } from 'motion/react';
-import { ArrowLeft, Clock, TrendingUp, CheckCircle2 } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import { ArrowLeft, Clock, TrendingUp, CheckCircle2, Zap, Shield, Info, ArrowRight } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../store/auth';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
@@ -60,7 +60,6 @@ export default function ActivePlan() {
       const newReturnsReceived = (plan.returns_received || 0) + 1;
       const isCompleted = newReturnsReceived >= plan.duration;
 
-      // Fetch current user balance
       const { data: currentUser } = await supabase
         .from('users')
         .select('balance, withdraw_balance')
@@ -68,7 +67,6 @@ export default function ActivePlan() {
         .single();
 
       if (currentUser) {
-        // Update user balance
         await supabase
           .from('users')
           .update({
@@ -78,7 +76,6 @@ export default function ActivePlan() {
           .eq('id', user.uid);
       }
 
-      // Update plan status
       await supabase
         .from('active_plans')
         .update({
@@ -88,7 +85,6 @@ export default function ActivePlan() {
         })
         .eq('id', plan.id);
 
-      // Add transaction
       await supabase.from('transactions').insert({
         user_id: user.uid,
         type: 'profit',
@@ -99,7 +95,6 @@ export default function ActivePlan() {
         time: new Date().toLocaleTimeString(),
       });
 
-      // Add notification
       await supabase.from('notifications').insert({
         user_id: user.uid,
         title: 'Daily Profit Claimed',
@@ -107,7 +102,6 @@ export default function ActivePlan() {
         read: false,
       });
 
-      // Refresh plans
       await fetchPlans();
     } catch (error) {
       console.error("Error claiming profit:", error);
@@ -131,102 +125,129 @@ export default function ActivePlan() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 font-sans pb-24 transition-colors duration-300">
-      <div className="bg-white dark:bg-slate-900 px-6 py-4 flex items-center gap-4 sticky top-0 z-30 shadow-sm border-b border-slate-100 dark:border-slate-800 transition-colors duration-300">
-        <button onClick={() => navigate('/app')} className="p-2 -ml-2 text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors rounded-full hover:bg-slate-50 dark:hover:bg-slate-800">
-          <ArrowLeft size={24} />
-        </button>
-        <h1 className="text-xl font-bold text-slate-900 dark:text-white">Active Plans</h1>
+    <div className="min-h-screen bg-[#050505] text-white font-sans pb-32 relative overflow-hidden">
+      {/* Background Elements */}
+      <div className="fixed inset-0 z-0">
+        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_50%_-20%,#1e1b4b,transparent_70%)] opacity-50"></div>
+        <div className="absolute inset-0 bg-[url('https://grainy-gradients.vercel.app/noise.svg')] opacity-20 mix-blend-overlay"></div>
+        <div className="absolute inset-0" style={{ backgroundImage: 'radial-gradient(#ffffff05 1px, transparent 1px)', backgroundSize: '40px 40px' }}></div>
       </div>
 
-      <div className="p-6">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex flex-col gap-6"
-        >
+      {/* Header */}
+      <div className="relative z-10 px-6 pt-8 pb-12">
+        <div className="flex items-center gap-4 mb-8">
+          <button onClick={() => navigate('/app')} className="w-12 h-12 bg-white/5 rounded-2xl flex items-center justify-center border border-white/10 hover:bg-white/10 transition-all active:scale-90">
+            <ArrowLeft size={24} />
+          </button>
+          <div>
+            <p className="text-white/40 text-[10px] font-bold uppercase tracking-[0.2em] mb-1">Portfolio Management</p>
+            <h1 className="text-2xl font-bold tracking-tight">Active Assets</h1>
+          </div>
+        </div>
+
+        <div className="space-y-6">
           {loading ? (
-            <div className="text-center py-12 text-slate-500 dark:text-slate-400">Loading active plans...</div>
+            <div className="flex flex-col items-center justify-center py-20 gap-4">
+              <div className="w-12 h-12 border-4 border-white/10 border-t-indigo-500 rounded-full animate-spin"></div>
+              <p className="text-white/40 text-sm font-medium animate-pulse">Synchronizing portfolio...</p>
+            </div>
           ) : activePlans.length > 0 ? (
-            activePlans.map((plan) => (
-              <div key={plan.id} className="bg-white dark:bg-slate-900 rounded-3xl p-6 shadow-sm border border-slate-100 dark:border-slate-800 transition-colors duration-300">
-                <div className="flex justify-between items-start mb-4">
+            activePlans.map((plan, idx) => (
+              <motion.div 
+                key={plan.id}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.1 * idx }}
+                className="bg-[#0a0a0a] border border-white/10 rounded-[2.5rem] p-8 relative overflow-hidden group"
+              >
+                <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:scale-110 transition-transform duration-700">
+                  <TrendingUp size={120} />
+                </div>
+
+                <div className="flex justify-between items-start mb-8">
                   <div>
-                    <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-1">{plan.name} Plan</h2>
-                    <p className="text-xs text-slate-500 dark:text-slate-400">Invested: {plan.price} PKR</p>
+                    <div className="flex items-center gap-2 mb-2">
+                      <div className="w-2 h-2 bg-emerald-500 rounded-full animate-pulse"></div>
+                      <span className="text-emerald-400 text-[10px] font-bold uppercase tracking-widest">Live Asset</span>
+                    </div>
+                    <h2 className="text-2xl font-bold tracking-tight mb-1">{plan.name} Plan</h2>
+                    <p className="text-white/40 text-[10px] font-bold uppercase tracking-widest">Principal: {plan.price} PKR</p>
                   </div>
-                  <div className="bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider flex items-center gap-1">
-                    <CheckCircle2 size={14} /> Active
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4 mb-6">
-                  <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl transition-colors duration-300">
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Daily Return</p>
-                    <p className="font-bold text-slate-900 dark:text-white">{plan.daily_return} PKR</p>
-                  </div>
-                  <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl transition-colors duration-300">
-                    <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Total Earned</p>
-                    <p className="font-bold text-emerald-600 dark:text-emerald-400">{(plan.returns_received || 0) * plan.daily_return} PKR</p>
+                  <div className="bg-white/5 border border-white/10 px-4 py-2 rounded-2xl flex items-center gap-2">
+                    <Zap size={14} className="text-indigo-400" />
+                    <span className="text-xs font-bold tracking-tight">{plan.returns_received}/{plan.duration}</span>
                   </div>
                 </div>
 
-                <div className="bg-indigo-50 dark:bg-indigo-900/20 p-4 rounded-2xl border border-indigo-100 dark:border-indigo-800/50 flex flex-col gap-4 transition-colors duration-300">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-indigo-100 dark:bg-indigo-900/50 rounded-full flex items-center justify-center text-indigo-600 dark:text-indigo-400">
-                        <Clock size={20} />
+                <div className="grid grid-cols-2 gap-4 mb-8">
+                  <div className="bg-white/5 border border-white/5 p-5 rounded-3xl">
+                    <p className="text-white/30 text-[10px] font-bold uppercase tracking-widest mb-1">Daily Yield</p>
+                    <p className="text-xl font-bold">{plan.daily_return} <span className="text-xs text-white/20">PKR</span></p>
+                  </div>
+                  <div className="bg-white/5 border border-white/5 p-5 rounded-3xl">
+                    <p className="text-white/30 text-[10px] font-bold uppercase tracking-widest mb-1">Total Accrued</p>
+                    <p className="text-xl font-bold text-emerald-400">{(plan.returns_received || 0) * plan.daily_return} <span className="text-xs opacity-40">PKR</span></p>
+                  </div>
+                </div>
+
+                <div className="bg-white/5 border border-white/10 p-6 rounded-[2rem] relative overflow-hidden">
+                  <div className="flex items-center justify-between mb-6">
+                    <div className="flex items-center gap-4">
+                      <div className="w-12 h-12 bg-indigo-500/10 border border-indigo-500/20 rounded-2xl flex items-center justify-center text-indigo-400">
+                        <Clock size={24} />
                       </div>
                       <div>
-                        <p className="text-xs text-indigo-600/70 dark:text-indigo-400/70 font-bold uppercase tracking-wider mb-0.5">Next Return In</p>
-                        <p className="font-mono font-bold text-indigo-900 dark:text-indigo-100 text-lg tracking-wider">
+                        <p className="text-white/30 text-[10px] font-bold uppercase tracking-widest mb-1">Next Payout</p>
+                        <p className="font-mono text-xl font-bold tracking-wider text-indigo-100">
                           {canClaim(plan.last_return_date) ? "00:00:00" : formatTimeLeft(plan.last_return_date)}
                         </p>
                       </div>
-                    </div>
-                    <div className="text-right">
-                      <p className="text-xs text-indigo-600/70 dark:text-indigo-400/70 font-bold uppercase tracking-wider mb-0.5">Returns</p>
-                      <p className="font-bold text-indigo-900 dark:text-indigo-100">{plan.returns_received || 0}/{plan.duration}</p>
                     </div>
                   </div>
 
                   <button
                     onClick={() => handleClaim(plan)}
                     disabled={!canClaim(plan.last_return_date) || claiming === plan.id}
-                    className={`w-full py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 ${
+                    className={`w-full py-5 rounded-2xl font-bold text-lg transition-all flex items-center justify-center gap-3 active:scale-95 ${
                       canClaim(plan.last_return_date) 
-                        ? 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-200 dark:shadow-none' 
-                        : 'bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-600 cursor-not-allowed'
+                        ? 'bg-white text-black hover:bg-white/90' 
+                        : 'bg-white/5 text-white/20 border border-white/5 cursor-not-allowed'
                     }`}
                   >
                     {claiming === plan.id ? (
-                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      <div className="w-6 h-6 border-4 border-current border-t-transparent rounded-full animate-spin"></div>
                     ) : (
                       <>
-                        <TrendingUp size={18} />
-                        {canClaim(plan.last_return_date) ? "Claim Daily Profit" : "Wait for Timer"}
+                        <Zap size={20} />
+                        {canClaim(plan.last_return_date) ? "Claim Daily Profit" : "Awaiting Cycle"}
                       </>
                     )}
                   </button>
                 </div>
-              </div>
+              </motion.div>
             ))
           ) : (
-            <div className="bg-white dark:bg-slate-900 rounded-3xl p-8 shadow-sm border border-slate-100 dark:border-slate-800 text-center transition-colors duration-300">
-              <div className="w-20 h-20 bg-indigo-50 dark:bg-indigo-900/30 rounded-full flex items-center justify-center mx-auto mb-4 transition-colors duration-300">
-                <TrendingUp className="text-indigo-300 dark:text-indigo-500" size={32} />
+            <motion.div 
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="bg-[#0a0a0a] border border-white/10 rounded-[2.5rem] p-12 text-center relative overflow-hidden"
+            >
+              <div className="w-24 h-24 bg-white/5 border border-white/10 rounded-[2rem] flex items-center justify-center mx-auto mb-8">
+                <TrendingUp className="text-white/20" size={48} />
               </div>
-              <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-2">No Active Plans</h2>
-              <p className="text-slate-500 dark:text-slate-400 mb-6">You don't have any active investment plans yet. Start investing to earn daily profits!</p>
+              <h2 className="text-2xl font-bold tracking-tight mb-4">No Active Assets</h2>
+              <p className="text-white/40 text-sm leading-relaxed mb-10 max-w-[280px] mx-auto">
+                Your portfolio is currently empty. Start your investment journey to generate daily returns.
+              </p>
               <button 
                 onClick={() => navigate('/app/plans')}
-                className="px-6 py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold transition-colors shadow-lg shadow-indigo-200 dark:shadow-none"
+                className="w-full py-5 bg-white text-black rounded-2xl font-bold text-lg hover:bg-white/90 transition-all flex items-center justify-center gap-3 active:scale-95"
               >
-                View Investment Plans
+                Explore Plans <ArrowRight size={20} />
               </button>
-            </div>
+            </motion.div>
           )}
-        </motion.div>
+        </div>
       </div>
     </div>
   );
