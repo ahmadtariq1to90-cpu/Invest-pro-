@@ -75,8 +75,8 @@ export default function Register() {
 
           if (dbError) {
             console.error("Error creating user profile:", dbError);
-            // We don't throw here to allow login even if profile creation fails, 
-            // but in a real app we'd want to handle this better or use database triggers
+            // If RLS fails here, it's likely because Email Confirmations are enabled in Supabase
+            throw new Error(`Profile creation failed: ${dbError.message}. (If you just set up Supabase, please go to Authentication -> Providers -> Email and turn OFF "Confirm email")`);
           }
 
           // Update referrer if referral code exists
