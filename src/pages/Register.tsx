@@ -1,10 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { Link, useNavigate, useSearchParams } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { ArrowLeft, User, Mail, Lock, Gift, CheckCircle2 } from "lucide-react";
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
-import { doc, setDoc, getDocs, collection, query, where, updateDoc, increment, serverTimestamp } from "firebase/firestore";
-import { auth, db, isFirebaseConfigured } from "../lib/firebase";
+import { supabase, isSupabaseConfigured } from "../lib/supabase";
 
 export default function Register() {
   const [searchParams] = useSearchParams();
@@ -41,45 +39,61 @@ export default function Register() {
 
     setLoading(true);
     try {
-      if (isFirebaseConfigured && auth && db) {
-        const userCredential = await createUserWithEmailAndPassword(
-          auth,
-          formData.email,
-          formData.password,
-        );
-        await updateProfile(userCredential.user, {
-          displayName: formData.fullName,
-        });
-
-        // Create user document
-        const myReferralCode = "INV" + Math.floor(10000 + Math.random() * 90000);
-        await setDoc(doc(db, "users", userCredential.user.uid), {
-          fullName: formData.fullName,
+      if (isSupabaseConfigured) {
+        const { data: authData, error: authError } = await supabase.auth.signUp({
           email: formData.email,
-          referredBy: formData.referralCode,
-          referralCode: myReferralCode,
-          balance: 0,
-          depositBalance: 0,
-          withdrawBalance: 0,
-          activePlansCount: 0,
-          totalInvestment: 0,
-          totalDeposit: 0,
-          totalWithdraw: 0,
-          referralEarnings: 0,
-          totalReferrals: 0,
-          createdAt: new Date().toISOString(),
-          timestamp: serverTimestamp(),
+          password: formData.password,
+          options: {
+            data: {
+              displayName: formData.fullName,
+            }
+          }
         });
 
-        // Update referrer if referral code exists
-        if (formData.referralCode) {
-          const q = query(collection(db, "users"), where("referralCode", "==", formData.referralCode));
-          const querySnapshot = await getDocs(q);
-          if (!querySnapshot.empty) {
-            const referrerDoc = querySnapshot.docs[0];
-            await updateDoc(doc(db, "users", referrerDoc.id), {
-              totalReferrals: increment(1)
-            });
+        if (authError) throw authError;
+
+        if (authData.user) {
+          const myReferralCode = "INV" + Math.floor(10000 + Math.random() * 90000);
+          
+          // Create user document
+          const { error: dbError } = await supabase.from('users').insert({
+            id: authData.user.id,
+            full_name: formData.fullName,
+            email: formData.email,
+            referred_by: formData.referralCode,
+            referral_code: myReferralCode,
+            balance: 0,
+            deposit_balance: 0,
+            withdraw_balance: 0,
+            active_plans_count: 0,
+            total_investment: 0,
+            total_deposit: 0,
+            total_withdraw: 0,
+            referral_earnings: 0,
+            total_referrals: 0,
+          });
+
+          if (dbError) {
+            console.error("Error creating user profile:", dbError);
+            // We don't throw here to allow login even if profile creation fails, 
+            // but in a real app we'd want to handle this better or use database triggers
+          }
+
+          // Update referrer if referral code exists
+          if (formData.referralCode) {
+            const { data: referrers } = await supabase
+              .from('users')
+              .select('id, total_referrals')
+              .eq('referral_code', formData.referralCode)
+              .limit(1);
+
+            if (referrers && referrers.length > 0) {
+              const referrer = referrers[0];
+              await supabase
+                .from('users')
+                .update({ total_referrals: (referrer.total_referrals || 0) + 1 })
+                .eq('id', referrer.id);
+            }
           }
         }
       }
@@ -88,10 +102,10 @@ export default function Register() {
         navigate("/login");
       }, 1500);
     } catch (err: any) {
-      if (err.code === "auth/email-already-in-use") {
+      if (err.message.includes("already registered")) {
         setError("Email already registered, please login.");
       } else {
-        setError("Failed to register. Please try again.");
+        setError(err.message || "Failed to register. Please try again.");
       }
     } finally {
       setLoading(false);

@@ -3,8 +3,7 @@ import { motion } from 'motion/react';
 import { ArrowLeft, Copy, Share2, Users, TrendingUp, Gift, CheckCircle2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../store/auth';
-import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
-import { db, isFirebaseConfigured } from '../lib/firebase';
+import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
 export default function Referral() {
   const navigate = useNavigate();
@@ -13,26 +12,25 @@ export default function Referral() {
   const [userData, setUserData] = useState<any>(null);
   const [referrals, setReferrals] = useState<any[]>([]);
   
-  const referralCode = userData?.referralCode || 'INV-PRO-2026';
+  const referralCode = userData?.referral_code || 'INV-PRO-2026';
   const referralLink = `${window.location.origin}/register?ref=${referralCode}`;
 
   useEffect(() => {
     const fetchUserDataAndReferrals = async () => {
-      if (isFirebaseConfigured && db && user?.uid) {
-        const docRef = doc(db, 'users', user.uid);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          const data = docSnap.data();
+      if (isSupabaseConfigured && user?.uid) {
+        const { data, error } = await supabase.from('users').select('*').eq('id', user.uid).single();
+        if (data && !error) {
           setUserData(data);
           
-          if (data.referralCode) {
-            const q = query(collection(db, 'users'), where('referredBy', '==', data.referralCode));
-            const querySnapshot = await getDocs(q);
-            const refs: any[] = [];
-            querySnapshot.forEach((doc) => {
-              refs.push({ id: doc.id, ...doc.data() });
-            });
-            setReferrals(refs);
+          if (data.referral_code) {
+            const { data: refsData, error: refsError } = await supabase
+              .from('users')
+              .select('*')
+              .eq('referred_by', data.referral_code);
+              
+            if (refsData && !refsError) {
+              setReferrals(refsData);
+            }
           }
         }
       }
@@ -95,7 +93,7 @@ export default function Referral() {
               </div>
               <div>
                 <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mb-1">Total Referrals</p>
-                <p className="font-bold text-slate-900 dark:text-white text-xl">{userData?.totalReferrals || 0}</p>
+                <p className="font-bold text-slate-900 dark:text-white text-xl">{userData?.total_referrals || 0}</p>
               </div>
             </div>
             <div className="bg-white dark:bg-slate-900 p-4 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 flex flex-col gap-3 transition-colors duration-300">
@@ -104,7 +102,7 @@ export default function Referral() {
               </div>
               <div>
                 <p className="text-xs text-slate-500 dark:text-slate-400 font-medium mb-1">Total Earnings</p>
-                <p className="font-bold text-slate-900 dark:text-white text-xl">{userData?.referralEarnings || 0} <span className="text-sm text-slate-500 dark:text-slate-400">PKR</span></p>
+                <p className="font-bold text-slate-900 dark:text-white text-xl">{userData?.referral_earnings || 0} <span className="text-sm text-slate-500 dark:text-slate-400">PKR</span></p>
               </div>
             </div>
           </div>
@@ -150,15 +148,15 @@ export default function Referral() {
                 <div key={i} className="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800 last:border-0 last:pb-0 transition-colors duration-300">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-600 dark:text-slate-400 font-bold transition-colors duration-300">
-                      {(ref.fullName || 'U')[0].toUpperCase()}
+                      {(ref.full_name || 'U')[0].toUpperCase()}
                     </div>
                     <div>
-                      <p className="font-bold text-slate-900 dark:text-white text-sm">{ref.fullName || 'User'}</p>
-                      <p className="text-xs text-slate-500 dark:text-slate-400">{new Date(ref.createdAt).toLocaleDateString()}</p>
+                      <p className="font-bold text-slate-900 dark:text-white text-sm">{ref.full_name || 'User'}</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400">{new Date(ref.created_at).toLocaleDateString()}</p>
                     </div>
                   </div>
-                  <div className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider ${ref.totalInvestment > 0 ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'}`}>
-                    {ref.totalInvestment > 0 ? 'Active' : 'Inactive'}
+                  <div className={`px-2 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider ${ref.total_investment > 0 ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400' : 'bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400'}`}>
+                    {ref.total_investment > 0 ? 'Active' : 'Inactive'}
                   </div>
                 </div>
               )) : (

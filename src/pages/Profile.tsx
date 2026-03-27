@@ -3,9 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { ArrowLeft, Camera, Edit2, Save, X, Lock } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../store/auth';
-import { updateProfile, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
-import { doc, updateDoc, getDoc } from 'firebase/firestore';
-import { auth, db, isFirebaseConfigured } from '../lib/firebase';
+import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
 export default function Profile() {
   const navigate = useNavigate();
@@ -29,20 +27,18 @@ export default function Profile() {
 
   useEffect(() => {
     const fetchUserData = async () => {
-      if (isFirebaseConfigured && db && user?.uid) {
-        const docRef = doc(db, 'users', user.uid);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          const data = docSnap.data();
+      if (isSupabaseConfigured && user?.uid) {
+        const { data, error } = await supabase.from('users').select('*').eq('id', user.uid).single();
+        if (data && !error) {
           setFormData({
-            fullName: user?.displayName || data.fullName || '',
+            fullName: user?.displayName || data.full_name || '',
             email: user?.email || data.email || '',
             phone: data.phone || '',
             dob: data.dob || '',
             country: data.country || ''
           });
-          if (data.profileImage) {
-            setProfileImage(data.profileImage);
+          if (data.profile_image) {
+            setProfileImage(data.profile_image);
           }
         }
       }
@@ -85,11 +81,15 @@ export default function Profile() {
           const imageUrl = data.data.url;
           setProfileImage(imageUrl);
           
-          if (auth?.currentUser && db) {
-            await updateDoc(doc(db, 'users', auth.currentUser.uid), {
-              profileImage: imageUrl
+          if (user?.uid) {
+            await supabase.from('users').update({
+              profile_image: imageUrl
+            }).eq('id', user.uid);
+            
+            await supabase.auth.updateUser({
+              data: { photoURL: imageUrl }
             });
-            await updateProfile(auth.currentUser, { photoURL: imageUrl });
+            
             setSuccess('Profile picture updated!');
             setTimeout(() => setSuccess(''), 3000);
           }
@@ -98,7 +98,7 @@ export default function Profile() {
         }
       } catch (err: any) {
         console.error("Profile image upload error:", err);
-        setError(err.message || 'Failed to update profile picture. Please try again.');
+        setError(`Upload failed: ${err.message || "Network error"}. Please check your connection or try a smaller image.`);
         setTimeout(() => setError(''), 3000);
       } finally {
         setLoading(false);
@@ -111,14 +111,18 @@ export default function Profile() {
     setError('');
     setSuccess('');
     try {
-      if (isFirebaseConfigured && auth?.currentUser && db) {
-        await updateProfile(auth.currentUser, { displayName: formData.fullName });
-        await updateDoc(doc(db, 'users', auth.currentUser.uid), {
-          fullName: formData.fullName,
+      if (isSupabaseConfigured && user?.uid) {
+        await supabase.auth.updateUser({
+          data: { displayName: formData.fullName }
+        });
+        
+        await supabase.from('users').update({
+          full_name: formData.fullName,
           phone: formData.phone,
           dob: formData.dob,
           country: formData.country
-        });
+        }).eq('id', user.uid);
+        
         setSuccess('Profile updated successfully!');
         setIsEditing(false);
         setTimeout(() => setSuccess(''), 3000);
@@ -139,21 +143,21 @@ export default function Profile() {
     }
     setLoading(true);
     try {
-      if (isFirebaseConfigured && auth?.currentUser && user?.email) {
-        const credential = EmailAuthProvider.credential(user.email, passwordData.current);
-        await reauthenticateWithCredential(auth.currentUser, credential);
-        await updatePassword(auth.currentUser, passwordData.new);
+      if (isSupabaseConfigured) {
+        // Supabase allows updating password directly if user is logged in
+        const { error } = await supabase.auth.updateUser({
+          password: passwordData.new
+        });
+        
+        if (error) throw error;
+        
         setSuccess('Password updated successfully! Please login again next time.');
         setShowPasswordPanel(false);
         setPasswordData({ current: '', new: '', confirm: '' });
         setTimeout(() => setSuccess(''), 3000);
       }
     } catch (err: any) {
-      if (err.code === 'auth/invalid-credential') {
-        setError('Incorrect current password.');
-      } else {
-        setError(err.message || 'Failed to update password');
-      }
+      setError(err.message || 'Failed to update password');
     } finally {
       setLoading(false);
     }

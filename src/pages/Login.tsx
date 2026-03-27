@@ -3,8 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "motion/react";
 import { ArrowLeft, ArrowRight, Mail, Lock, CheckCircle2 } from "lucide-react";
 import { useAuth } from "../store/auth";
-import { signInWithEmailAndPassword, fetchSignInMethodsForEmail } from "firebase/auth";
-import { auth, isFirebaseConfigured } from "../lib/firebase";
+import { supabase, isSupabaseConfigured } from "../lib/supabase";
 
 export default function Login() {
   const [step, setStep] = useState(1);
@@ -22,13 +21,16 @@ export default function Login() {
     e.preventDefault();
     setError("");
     if (step === 1 && email) {
-      // Skip email enumeration check as it's often blocked by Firebase security settings
       setStep(2);
     } else if (step === 2 && password) {
       setLoading(true);
       try {
-        if (isFirebaseConfigured && auth) {
-          await signInWithEmailAndPassword(auth, email, password);
+        if (isSupabaseConfigured) {
+          const { data, error } = await supabase.auth.signInWithPassword({
+            email,
+            password,
+          });
+          if (error) throw error;
         } else {
           login({ uid: "123", email, displayName: email.split("@")[0] });
         }
@@ -37,10 +39,10 @@ export default function Login() {
           navigate("/app");
         }, 1500);
       } catch (err: any) {
-        if (err.code === "auth/invalid-credential" || err.code === "auth/wrong-password" || err.code === "auth/user-not-found") {
+        if (err.message.includes("Invalid login credentials")) {
           setError("Account not found or invalid password. Please register first.");
         } else {
-          setError("Failed to login. Please check your credentials.");
+          setError(err.message || "Failed to login. Please check your credentials.");
         }
       } finally {
         setLoading(false);

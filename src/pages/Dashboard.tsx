@@ -13,8 +13,7 @@ import {
   X,
 } from "lucide-react";
 import { useAuth } from "../store/auth";
-import { doc, collection, query, orderBy, limit, where, onSnapshot, getDocs, updateDoc, increment, serverTimestamp, addDoc } from "firebase/firestore";
-import { db, isFirebaseConfigured } from "../lib/firebase";
+import { supabase, isSupabaseConfigured } from "../lib/supabase";
 
 const ACTIVITIES = [
   {
@@ -63,105 +62,55 @@ export default function Dashboard() {
   const [recentActivity, setRecentActivity] = useState<any[]>([]);
   const [unreadNotifications, setUnreadNotifications] = useState(0);
 
-  // Lazy Profit System
   useEffect(() => {
-    const processProfits = async () => {
-      if (!isFirebaseConfigured || !db || !user?.uid) return;
+    if (!isSupabaseConfigured || !user?.uid) return;
 
-      try {
-        const plansQuery = query(
-          collection(db, "users", user.uid, "activePlans"),
-          where("status", "==", "active")
-        );
-        const plansSnap = await getDocs(plansQuery);
-        const now = new Date();
+    const fetchData = async () => {
+      // Fetch user data
+      const { data: uData } = await supabase
+        .from("users")
+        .select("*")
+        .eq("id", user.uid)
+        .single();
+      if (uData) setUserData(uData);
 
-        for (const planDoc of plansSnap.docs) {
-          const plan = planDoc.data();
-          const lastReturnDate = plan.lastReturnDate?.toDate() || plan.startDate?.toDate();
-          if (!lastReturnDate) continue;
+      // Fetch recent activity
+      const { data: txs } = await supabase
+        .from("transactions")
+        .select("*")
+        .eq("user_id", user.uid)
+        .order("created_at", { ascending: false })
+        .limit(5);
+      if (txs) setRecentActivity(txs);
 
-          const diffMs = now.getTime() - lastReturnDate.getTime();
-          const intervals = Math.floor(diffMs / (24 * 60 * 60 * 1000));
-
-          if (intervals > 0) {
-            const daysToClaim = Math.min(intervals, plan.duration - (plan.returnsReceived || 0));
-            
-            if (daysToClaim > 0) {
-              const totalProfit = daysToClaim * plan.dailyReturn;
-              const newReturnsReceived = (plan.returnsReceived || 0) + daysToClaim;
-              const isCompleted = newReturnsReceived >= plan.duration;
-
-              // Update user balance
-              await updateDoc(doc(db, "users", user.uid), {
-                balance: increment(totalProfit),
-                withdrawBalance: increment(totalProfit)
-              });
-
-              // Update plan
-              await updateDoc(planDoc.ref, {
-                returnsReceived: newReturnsReceived,
-                lastReturnDate: serverTimestamp(),
-                status: isCompleted ? "completed" : "active"
-              });
-
-              // Add transaction
-              await addDoc(collection(db, "users", user.uid, "transactions"), {
-                type: "profit",
-                amount: `+${totalProfit}`,
-                status: "Completed",
-                title: `Daily Profit: ${plan.name} Plan`,
-                date: now.toLocaleDateString(),
-                time: now.toLocaleTimeString(),
-                timestamp: serverTimestamp(),
-              });
-
-              // Add notification
-              await addDoc(collection(db, "users", user.uid, "notifications"), {
-                title: "Daily Profit Added",
-                message: `You received ${totalProfit} PKR profit from your ${plan.name} plan.`,
-                timestamp: serverTimestamp(),
-                read: false,
-              });
-            }
-          }
-        }
-      } catch (error) {
-        console.error("Error processing lazy profits:", error);
-      }
+      // Fetch unread notifications
+      const { count } = await supabase
+        .from("notifications")
+        .select("*", { count: "exact", head: true })
+        .eq("user_id", user.uid)
+        .eq("read", false);
+      if (count !== null) setUnreadNotifications(count);
     };
 
-    processProfits();
-  }, [user]);
+    fetchData();
 
-  useEffect(() => {
-    if (!isFirebaseConfigured || !db || !user?.uid) return;
+    // Set up realtime subscriptions
+    const userSub = supabase.channel('user_changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'users', filter: `id=eq.${user.uid}` }, fetchData)
+      .subscribe();
 
-    // Listen to user data
-    const unsubscribeUser = onSnapshot(doc(db, "users", user.uid), (docSnap) => {
-      if (docSnap.exists()) {
-        setUserData(docSnap.data());
-      }
-    });
+    const txSub = supabase.channel('tx_changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'transactions', filter: `user_id=eq.${user.uid}` }, fetchData)
+      .subscribe();
 
-    // Listen to recent activity
-    const txQuery = query(collection(db, 'users', user.uid, 'transactions'), orderBy('timestamp', 'desc'), limit(5));
-    const unsubscribeTx = onSnapshot(txQuery, (txSnap) => {
-      const txs: any[] = [];
-      txSnap.forEach(doc => txs.push({ id: doc.id, ...doc.data() }));
-      setRecentActivity(txs);
-    });
-
-    // Listen to unread notifications count
-    const notifQuery = query(collection(db, 'users', user.uid, 'notifications'), where('read', '==', false));
-    const unsubscribeNotif = onSnapshot(notifQuery, (notifSnap) => {
-      setUnreadNotifications(notifSnap.size);
-    });
+    const notifSub = supabase.channel('notif_changes')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'notifications', filter: `user_id=eq.${user.uid}` }, fetchData)
+      .subscribe();
 
     return () => {
-      unsubscribeUser();
-      unsubscribeTx();
-      unsubscribeNotif();
+      supabase.removeChannel(userSub);
+      supabase.removeChannel(txSub);
+      supabase.removeChannel(notifSub);
     };
   }, [user]);
 
@@ -259,9 +208,9 @@ export default function Dashboard() {
         <div className="flex justify-between items-center relative z-10">
           <div className="flex items-center gap-3">
             <Link to="/app/profile" className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center backdrop-blur-sm border border-white/10 overflow-hidden hover:scale-105 transition-transform">
-              {userData?.profileImage || user?.photoURL ? (
+              {userData?.profile_image || user?.photoURL ? (
                 <img
-                  src={userData?.profileImage || user?.photoURL}
+                  src={userData?.profile_image || user?.photoURL}
                   alt="Profile"
                   className="w-full h-full object-cover"
                   referrerPolicy="no-referrer"
@@ -325,7 +274,7 @@ export default function Dashboard() {
               <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Deposit Balance</p>
               <p className="font-bold text-slate-900 dark:text-white">
                 {showBalance
-                  ? (userData?.depositBalance || 0).toLocaleString() + ".00"
+                  ? (userData?.deposit_balance || 0).toLocaleString() + ".00"
                   : "••••"}{" "}
                 PKR
               </p>
@@ -334,7 +283,7 @@ export default function Dashboard() {
             <div className="text-right">
               <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Active Plans</p>
               <p className="font-bold text-indigo-600 dark:text-indigo-400">
-                {userData?.activePlansCount || 0} Plans
+                {userData?.active_plans_count || 0} Plans
               </p>
             </div>
           </div>
@@ -346,25 +295,25 @@ export default function Dashboard() {
         {[
           {
             title: "Total Investment",
-            amount: (userData?.totalInvestment || 0).toLocaleString(),
+            amount: (userData?.total_investment || 0).toLocaleString(),
             icon: TrendingUp,
             color: "bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400",
           },
           {
             title: "Total Deposit",
-            amount: (userData?.totalDeposit || 0).toLocaleString(),
+            amount: (userData?.total_deposit || 0).toLocaleString(),
             icon: ArrowDownToLine,
             color: "bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400",
           },
           {
             title: "Total Withdraw",
-            amount: (userData?.totalWithdraw || 0).toLocaleString(),
+            amount: (userData?.total_withdraw || 0).toLocaleString(),
             icon: ArrowUpFromLine,
             color: "bg-rose-50 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400",
           },
           {
             title: "Referral Earnings",
-            amount: (userData?.referralEarnings || 0).toLocaleString(),
+            amount: (userData?.referral_earnings || 0).toLocaleString(),
             icon: Users,
             color: "bg-amber-50 dark:bg-amber-900/30 text-amber-600 dark:text-amber-400",
           },
@@ -426,12 +375,15 @@ export default function Dashboard() {
               <div key={tx.id} className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-4 shadow-sm flex items-center justify-between hover:shadow-md transition-all duration-300">
                 <div className="flex items-center gap-4">
                   <div className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors duration-300 ${
-                    tx.type === 'deposit' ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400' : 'bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400'
+                    tx.type === 'deposit' || tx.type === 'return' || tx.type === 'profit' ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400' : 
+                    tx.type === 'investment' ? 'bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400' :
+                    'bg-rose-100 dark:bg-rose-900/30 text-rose-600 dark:text-rose-400'
                   }`}>
-                    {tx.type === 'deposit' ? <ArrowDownToLine size={20} /> : <ArrowUpFromLine size={20} />}
+                    {tx.type === 'deposit' || tx.type === 'return' || tx.type === 'profit' ? <ArrowDownToLine size={20} /> : 
+                     tx.type === 'investment' ? <TrendingUp size={20} /> : <ArrowUpFromLine size={20} />}
                   </div>
                   <div>
-                    <p className="font-bold text-slate-900 dark:text-white text-sm">{tx.userName || user?.displayName || 'User'}</p>
+                    <p className="font-bold text-slate-900 dark:text-white text-sm">{tx.user_name || user?.displayName || 'User'}</p>
                     <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{tx.date} {tx.time && `• ${tx.time}`}</p>
                   </div>
                 </div>

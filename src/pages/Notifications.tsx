@@ -3,8 +3,7 @@ import { motion } from 'motion/react';
 import { ArrowLeft, Bell, CheckCircle2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../store/auth';
-import { collection, query, orderBy, getDocs, doc, writeBatch } from 'firebase/firestore';
-import { db, isFirebaseConfigured } from '../lib/firebase';
+import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
 export default function Notifications() {
   const navigate = useNavigate();
@@ -14,15 +13,16 @@ export default function Notifications() {
 
   useEffect(() => {
     const fetchNotifications = async () => {
-      if (isFirebaseConfigured && db && user?.uid) {
+      if (isSupabaseConfigured && user?.uid) {
         try {
-          const q = query(collection(db, 'users', user.uid, 'notifications'), orderBy('timestamp', 'desc'));
-          const querySnapshot = await getDocs(q);
-          const notifs: any[] = [];
-          querySnapshot.forEach((doc) => {
-            notifs.push({ id: doc.id, ...doc.data() });
-          });
-          setNotifications(notifs);
+          const { data, error } = await supabase
+            .from('notifications')
+            .select('*')
+            .eq('user_id', user.uid)
+            .order('created_at', { ascending: false });
+
+          if (error) throw error;
+          setNotifications(data || []);
         } catch (error) {
           console.error("Error fetching notifications:", error);
         } finally {
@@ -36,18 +36,18 @@ export default function Notifications() {
   }, [user]);
 
   const markAllAsRead = async () => {
-    if (!isFirebaseConfigured || !db || !user?.uid) return;
+    if (!isSupabaseConfigured || !user?.uid) return;
     
     const unreadNotifs = notifications.filter(n => !n.read);
     if (unreadNotifs.length === 0) return;
 
     try {
-      const batch = writeBatch(db);
-      unreadNotifs.forEach(notif => {
-        const notifRef = doc(db, 'users', user.uid, 'notifications', notif.id);
-        batch.update(notifRef, { read: true });
-      });
-      await batch.commit();
+      const unreadIds = unreadNotifs.map(n => n.id);
+      
+      await supabase
+        .from('notifications')
+        .update({ read: true })
+        .in('id', unreadIds);
       
       setNotifications(notifications.map(n => ({ ...n, read: true })));
     } catch (error) {
@@ -99,7 +99,7 @@ export default function Notifications() {
                       {notif.title}
                     </p>
                     <p className="text-[10px] text-slate-500 dark:text-slate-400 whitespace-nowrap">
-                      {notif.timestamp?.toDate().toLocaleDateString() || 'Just now'}
+                      {new Date(notif.created_at).toLocaleDateString() || 'Just now'}
                     </p>
                   </div>
                   <p className="text-xs text-slate-600 dark:text-slate-300 mt-1 leading-relaxed">

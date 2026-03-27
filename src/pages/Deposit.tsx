@@ -3,8 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { ArrowLeft, Upload, CheckCircle2, ChevronRight, X } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../store/auth';
-import { doc, setDoc, collection, serverTimestamp, updateDoc, increment, addDoc } from 'firebase/firestore';
-import { db, isFirebaseConfigured } from '../lib/firebase';
+import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
 const METHODS = [
   { id: 'jazzcash', name: 'JazzCash', logo: 'https://i.ibb.co/39p1XHHh/images-2-fotor-bg-remover-2026022715323.png', account: '03001234567', title: 'Muhammad Ali' },
@@ -51,7 +50,7 @@ export default function Deposit() {
   };
 
   const handleConfirmAndSave = async () => {
-    if (!isFirebaseConfigured || !db || !user?.uid) {
+    if (!isSupabaseConfigured || !user?.uid) {
       setError("System configuration error. Please try again later.");
       return;
     }
@@ -87,35 +86,36 @@ export default function Deposit() {
           }
         } catch (uploadErr: any) {
           console.error("ImgBB Upload error:", uploadErr);
-          throw new Error(uploadErr.message || "Failed to upload screenshot to free server. Please try again.");
+          throw new Error(`Upload failed: ${uploadErr.message || "Network error"}. Please check your connection or try a smaller image.`);
         }
       }
 
-      // 2. Save deposit request in Firestore
+      // 2. Save deposit request in Supabase
       const now = new Date();
       const txData = {
+        user_id: user.uid,
         type: 'deposit',
         amount: `+${amount}`,
-        depositAmount: Number(amount),
+        deposit_amount: Number(amount),
         status: 'Pending',
         title: `Deposit via ${method.name}`,
         date: now.toLocaleDateString(),
         time: now.toLocaleTimeString(),
-        userName: user.displayName || 'User',
-        userEmail: user.email || '',
-        screenshotUrl: screenshotUrl,
-        timestamp: serverTimestamp(),
+        user_name: user.displayName || 'User',
+        user_email: user.email || '',
+        screenshot_url: screenshotUrl,
         method: method.name,
       };
 
       try {
-        await addDoc(collection(db, 'users', user.uid, 'transactions'), txData);
+        const { error: txError } = await supabase.from('transactions').insert(txData);
+        if (txError) throw txError;
 
         // Save notification
-        await addDoc(collection(db, 'users', user.uid, 'notifications'), {
+        await supabase.from('notifications').insert({
+          user_id: user.uid,
           title: 'Deposit Request Submitted',
           message: `Your deposit request of ${amount} PKR via ${method.name} is pending approval.`,
-          timestamp: serverTimestamp(),
           read: false,
         });
       } catch (dbErr: any) {

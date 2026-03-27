@@ -3,8 +3,7 @@ import { motion } from 'motion/react';
 import { ArrowLeft, ArrowDownToLine, ArrowUpFromLine, ChevronDown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../store/auth';
-import { collection, query, orderBy, onSnapshot } from 'firebase/firestore';
-import { db, isFirebaseConfigured } from '../lib/firebase';
+import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
 export default function History() {
   const navigate = useNavigate();
@@ -16,25 +15,37 @@ export default function History() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (!isFirebaseConfigured || !db || !user?.uid) {
+    if (!isSupabaseConfigured || !user?.uid) {
       setLoading(false);
       return;
     }
 
-    const q = query(collection(db, 'users', user.uid, 'transactions'), orderBy('timestamp', 'desc'));
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      const txs: any[] = [];
-      querySnapshot.forEach((doc) => {
-        txs.push({ id: doc.id, ...doc.data() });
-      });
-      setTransactions(txs);
-      setLoading(false);
-    }, (error) => {
-      console.error("Error fetching transactions:", error);
-      setLoading(false);
-    });
+    const fetchTransactions = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('transactions')
+          .select('*')
+          .eq('user_id', user.uid)
+          .order('created_at', { ascending: false });
 
-    return () => unsubscribe();
+        if (error) throw error;
+        setTransactions(data || []);
+      } catch (error) {
+        console.error("Error fetching transactions:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTransactions();
+
+    const subscription = supabase.channel('transactions_channel')
+      .on('postgres_changes', { event: '*', schema: 'public', table: 'transactions', filter: `user_id=eq.${user.uid}` }, fetchTransactions)
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(subscription);
+    };
   }, [user]);
 
   const filteredTransactions = transactions.filter(tx => {
@@ -43,7 +54,7 @@ export default function History() {
     // Simple filter logic for demo purposes
     if (filter === 'All') return true;
     
-    const txDate = tx.timestamp?.toDate() || new Date();
+    const txDate = new Date(tx.created_at || tx.date);
     const now = new Date();
     const diffTime = Math.abs(now.getTime() - txDate.getTime());
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)); 
@@ -130,7 +141,7 @@ export default function History() {
                     {tx.type === 'deposit' ? <ArrowDownToLine size={20} /> : <ArrowUpFromLine size={20} />}
                   </div>
                   <div>
-                    <p className="font-bold text-slate-900 dark:text-white text-sm">{tx.userName || user?.displayName || 'User'}</p>
+                    <p className="font-bold text-slate-900 dark:text-white text-sm">{tx.user_name || user?.displayName || 'User'}</p>
                     <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">{tx.date} {tx.time && `• ${tx.time}`}</p>
                   </div>
                 </div>

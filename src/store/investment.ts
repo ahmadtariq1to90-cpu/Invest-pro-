@@ -1,28 +1,28 @@
 import { useEffect } from 'react';
 import { useAuth } from './auth';
-import { collection, query, where, getDocs, doc, updateDoc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
-import { db, isFirebaseConfigured } from '../lib/firebase';
+import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
 export function useInvestmentReturns() {
   const { user } = useAuth();
 
   useEffect(() => {
     const checkReturns = async () => {
-      if (!isFirebaseConfigured || !db || !user?.uid) return;
+      if (!isSupabaseConfigured || !user?.uid) return;
 
       try {
-        const q = query(collection(db, 'users', user.uid, 'activePlans'), where('status', '==', 'active'));
-        const querySnapshot = await getDocs(q);
-        
-        if (querySnapshot.empty) return;
+        const { data: activePlans, error: plansError } = await supabase
+          .from('active_plans')
+          .select('*')
+          .eq('user_id', user.uid)
+          .eq('status', 'active');
+          
+        if (plansError || !activePlans || activePlans.length === 0) return;
 
         const now = new Date();
-        const userRef = doc(db, 'users', user.uid);
         let totalNewReturns = 0;
 
-        for (const planDoc of querySnapshot.docs) {
-          const plan = planDoc.data();
-          const lastReturnDate = plan.lastReturnDate?.toDate() || plan.startDate?.toDate();
+        for (const plan of activePlans) {
+          const lastReturnDate = new Date(plan.last_return_date || plan.start_date);
           
           if (!lastReturnDate) continue;
 
@@ -32,39 +32,37 @@ export function useInvestmentReturns() {
 
           if (daysPassed > 0) {
             // Calculate returns
-            const returnsToAdd = Math.min(daysPassed, plan.duration - (plan.returnsReceived || 0));
+            const returnsToAdd = Math.min(daysPassed, plan.duration - (plan.returns_received || 0));
             
             if (returnsToAdd > 0) {
-              const returnAmount = returnsToAdd * plan.dailyReturn;
+              const returnAmount = returnsToAdd * plan.daily_return;
               totalNewReturns += returnAmount;
 
-              const newReturnsReceived = (plan.returnsReceived || 0) + returnsToAdd;
+              const newReturnsReceived = (plan.returns_received || 0) + returnsToAdd;
               const newStatus = newReturnsReceived >= plan.duration ? 'completed' : 'active';
               
               // Update plan
-              await updateDoc(planDoc.ref, {
-                returnsReceived: newReturnsReceived,
-                lastReturnDate: new Date(lastReturnDate.getTime() + returnsToAdd * 24 * 60 * 60 * 1000),
+              await supabase.from('active_plans').update({
+                returns_received: newReturnsReceived,
+                last_return_date: new Date(lastReturnDate.getTime() + returnsToAdd * 24 * 60 * 60 * 1000).toISOString(),
                 status: newStatus
-              });
+              }).eq('id', plan.id);
 
               // Save transaction for this return
-              const txRef = doc(collection(db, 'users', user.uid, 'transactions'));
-              await setDoc(txRef, {
+              await supabase.from('transactions').insert({
+                user_id: user.uid,
                 type: 'return',
                 amount: `+${returnAmount}`,
                 status: 'Completed',
                 title: `Daily Return - ${plan.name} Plan`,
                 date: new Date().toLocaleDateString(),
-                timestamp: serverTimestamp(),
               });
 
               // Save notification
-              const notifRef = doc(collection(db, 'users', user.uid, 'notifications'));
-              await setDoc(notifRef, {
+              await supabase.from('notifications').insert({
+                user_id: user.uid,
                 title: 'Investment Return Received',
                 message: `You received ${returnAmount} PKR from your ${plan.name} plan.`,
-                timestamp: serverTimestamp(),
                 read: false,
               });
             }
@@ -73,13 +71,17 @@ export function useInvestmentReturns() {
 
         // Update user balance if there are new returns
         if (totalNewReturns > 0) {
-          const userSnap = await getDoc(userRef);
-          if (userSnap.exists()) {
-            const userData = userSnap.data();
-            await updateDoc(userRef, {
+          const { data: userData, error: userError } = await supabase
+            .from('users')
+            .select('balance, withdraw_balance')
+            .eq('id', user.uid)
+            .single();
+            
+          if (userData && !userError) {
+            await supabase.from('users').update({
               balance: (userData.balance || 0) + totalNewReturns,
-              withdrawBalance: (userData.withdrawBalance || 0) + totalNewReturns
-            });
+              withdraw_balance: (userData.withdraw_balance || 0) + totalNewReturns
+            }).eq('id', user.uid);
           }
         }
 

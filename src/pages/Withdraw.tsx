@@ -3,8 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { ArrowLeft, CheckCircle2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../store/auth';
-import { doc, getDoc, setDoc, collection, serverTimestamp, updateDoc, increment, addDoc } from 'firebase/firestore';
-import { db, isFirebaseConfigured } from '../lib/firebase';
+import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
 const METHODS = [
   { id: 'jazzcash', name: 'JazzCash', logo: 'https://i.ibb.co/39p1XHHh/images-2-fotor-bg-remover-2026022715323.png' },
@@ -27,11 +26,15 @@ export default function Withdraw() {
 
   useEffect(() => {
     const fetchBalance = async () => {
-      if (isFirebaseConfigured && db && user?.uid) {
-        const docRef = doc(db, 'users', user.uid);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          setBalance(docSnap.data().balance || 0);
+      if (isSupabaseConfigured && user?.uid) {
+        const { data } = await supabase
+          .from('users')
+          .select('balance')
+          .eq('id', user.uid)
+          .single();
+          
+        if (data) {
+          setBalance(data.balance || 0);
         }
       }
     };
@@ -67,7 +70,7 @@ export default function Withdraw() {
   };
 
   const handleConfirmAndSave = async () => {
-    if (!isFirebaseConfigured || !db || !user?.uid) {
+    if (!isSupabaseConfigured || !user?.uid) {
       setError("System configuration error. Please try again later.");
       return;
     }
@@ -76,19 +79,21 @@ export default function Withdraw() {
     setError('');
     
     try {
-      const userRef = doc(db, 'users', user.uid);
-      const docSnap = await getDoc(userRef);
-      
-      if (!docSnap.exists()) {
+      const { data: userData, error: userError } = await supabase
+        .from('users')
+        .select('*')
+        .eq('id', user.uid)
+        .single();
+        
+      if (userError || !userData) {
         throw new Error("User account not found. Please contact support.");
       }
 
-      const userData = docSnap.data();
-      const currentBalance = userData.balance || 0;
+      const currentBalance = userData.withdraw_balance || 0;
       const numAmount = Number(amount);
 
       if (currentBalance < numAmount) {
-        setError(`Insufficient balance! You have ${currentBalance} PKR but trying to withdraw ${numAmount} PKR.`);
+        setError(`Insufficient withdraw balance! You have ${currentBalance} PKR but trying to withdraw ${numAmount} PKR.`);
         setLoading(false);
         setShowPopup(false);
         return;
@@ -97,32 +102,45 @@ export default function Withdraw() {
       // Save transaction request (Status: Pending)
       const now = new Date();
       const txData = {
+        user_id: user.uid,
         type: 'withdraw',
         amount: `-${amount}`,
-        withdrawAmount: numAmount,
+        withdraw_amount: numAmount,
         status: 'Pending',
         title: `Withdraw via ${method.name}`,
         date: now.toLocaleDateString(),
         time: now.toLocaleTimeString(),
-        dateTime: now.toISOString(),
-        userName: user.displayName || 'User',
-        userEmail: user.email || '',
-        phoneNumber: accountNumber,
-        timestamp: serverTimestamp(),
+        user_name: user.displayName || 'User',
+        user_email: user.email || '',
+        phone_number: accountNumber,
         method: method.name,
-        bankName: method.id === 'bank' ? bankName : '',
-        accountName,
-        accountNumber,
+        bank_name: method.id === 'bank' ? bankName : '',
+        account_name: accountName,
+        account_number: accountNumber,
       };
 
-      // 1. Save transaction
-      await addDoc(collection(db, 'users', user.uid, 'transactions'), txData);
+      // 1. Deduct withdraw balance and total balance
+      const newWithdrawBalance = currentBalance - numAmount;
+      const newTotalBalance = (userData.balance || 0) - numAmount;
+      const { error: updateError } = await supabase
+        .from('users')
+        .update({
+          withdraw_balance: newWithdrawBalance,
+          balance: newTotalBalance
+        })
+        .eq('id', user.uid);
 
-      // 2. Save notification
-      await addDoc(collection(db, 'users', user.uid, 'notifications'), {
+      if (updateError) throw updateError;
+
+      // 2. Save transaction
+      const { error: txError } = await supabase.from('transactions').insert(txData);
+      if (txError) throw txError;
+
+      // 3. Save notification
+      await supabase.from('notifications').insert({
+        user_id: user.uid,
         title: 'Withdraw Request Submitted',
         message: `Your withdraw request of ${amount} PKR via ${method.name} is pending approval.`,
-        timestamp: serverTimestamp(),
         read: false,
       });
 

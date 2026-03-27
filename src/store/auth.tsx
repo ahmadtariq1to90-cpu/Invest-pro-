@@ -1,6 +1,5 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
-import { auth, isFirebaseConfigured } from "../lib/firebase";
-import { onAuthStateChanged } from "firebase/auth";
+import { supabase, isSupabaseConfigured } from "../lib/supabase";
 
 interface User {
   uid: string;
@@ -30,21 +29,40 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    if (isFirebaseConfigured && auth) {
-      const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
-        if (firebaseUser) {
+    if (isSupabaseConfigured) {
+      // Get initial session
+      supabase.auth.getSession().then(({ data: { session } }) => {
+        if (session?.user) {
           setUser({
-            uid: firebaseUser.uid,
-            email: firebaseUser.email,
-            displayName: firebaseUser.displayName,
-            photoURL: firebaseUser.photoURL,
+            uid: session.user.id,
+            email: session.user.email || null,
+            displayName: session.user.user_metadata?.displayName || null,
+            photoURL: session.user.user_metadata?.photoURL || null,
           });
         } else {
           setUser(null);
         }
         setLoading(false);
       });
-      return () => unsubscribe();
+
+      // Listen for auth changes
+      const { data: { subscription } } = supabase.auth.onAuthStateChange(
+        (_event, session) => {
+          if (session?.user) {
+            setUser({
+              uid: session.user.id,
+              email: session.user.email || null,
+              displayName: session.user.user_metadata?.displayName || null,
+              photoURL: session.user.user_metadata?.photoURL || null,
+            });
+          } else {
+            setUser(null);
+          }
+          setLoading(false);
+        }
+      );
+
+      return () => subscription.unsubscribe();
     } else {
       // Mock implementation
       const storedUser = localStorage.getItem("mockUser");
@@ -57,17 +75,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 
   const login = (newUser: User) => {
     setUser(newUser);
-    if (!isFirebaseConfigured) {
+    if (!isSupabaseConfigured) {
       localStorage.setItem("mockUser", JSON.stringify(newUser));
     }
   };
 
   const logout = async () => {
-    if (isFirebaseConfigured && auth) {
-      await import("firebase/auth").then(({ signOut }) => signOut(auth));
+    if (isSupabaseConfigured) {
+      await supabase.auth.signOut();
     }
     setUser(null);
-    if (!isFirebaseConfigured) {
+    if (!isSupabaseConfigured) {
       localStorage.removeItem("mockUser");
     }
   };

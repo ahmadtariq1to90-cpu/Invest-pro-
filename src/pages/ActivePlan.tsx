@@ -3,8 +3,7 @@ import { motion } from 'motion/react';
 import { ArrowLeft, Clock, TrendingUp, CheckCircle2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../store/auth';
-import { collection, query, where, getDocs, doc, updateDoc, increment, serverTimestamp } from 'firebase/firestore';
-import { db, isFirebaseConfigured } from '../lib/firebase';
+import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
 export default function ActivePlan() {
   const navigate = useNavigate();
@@ -15,15 +14,16 @@ export default function ActivePlan() {
   const [now, setNow] = useState(new Date());
 
   const fetchPlans = async () => {
-    if (isFirebaseConfigured && db && user?.uid) {
+    if (isSupabaseConfigured && user?.uid) {
       try {
-        const q = query(collection(db, 'users', user.uid, 'activePlans'), where('status', '==', 'active'));
-        const querySnapshot = await getDocs(q);
-        const plans: any[] = [];
-        querySnapshot.forEach((doc) => {
-          plans.push({ id: doc.id, ...doc.data() });
-        });
-        setActivePlans(plans);
+        const { data: plans, error } = await supabase
+          .from('active_plans')
+          .select('*')
+          .eq('user_id', user.uid)
+          .eq('status', 'active');
+          
+        if (error) throw error;
+        setActivePlans(plans || []);
       } catch (error) {
         console.error("Error fetching active plans:", error);
       } finally {
@@ -47,32 +47,64 @@ export default function ActivePlan() {
 
   const canClaim = (lastReturnDate: any) => {
     if (!lastReturnDate) return true;
-    const lastDate = lastReturnDate.toDate();
+    const lastDate = new Date(lastReturnDate);
     const nextReturnDate = new Date(lastDate.getTime() + 24 * 60 * 60 * 1000);
     return now.getTime() >= nextReturnDate.getTime();
   };
 
   const handleClaim = async (plan: any) => {
-    if (!user?.uid || !isFirebaseConfigured || !db) return;
+    if (!user?.uid || !isSupabaseConfigured) return;
     
     setClaiming(plan.id);
     try {
-      const userRef = doc(db, 'users', user.uid);
-      const planRef = doc(db, 'users', user.uid, 'activePlans', plan.id);
-      
-      const newReturnsReceived = (plan.returnsReceived || 0) + 1;
+      const newReturnsReceived = (plan.returns_received || 0) + 1;
       const isCompleted = newReturnsReceived >= plan.duration;
 
-      // Update user balance
-      await updateDoc(userRef, {
-        balance: increment(plan.dailyReturn)
-      });
+      // Fetch current user balance
+      const { data: currentUser } = await supabase
+        .from('users')
+        .select('balance, withdraw_balance')
+        .eq('id', user.uid)
+        .single();
+
+      if (currentUser) {
+        // Update user balance
+        await supabase
+          .from('users')
+          .update({
+            balance: (currentUser.balance || 0) + plan.daily_return,
+            withdraw_balance: (currentUser.withdraw_balance || 0) + plan.daily_return
+          })
+          .eq('id', user.uid);
+      }
 
       // Update plan status
-      await updateDoc(planRef, {
-        returnsReceived: newReturnsReceived,
-        lastReturnDate: serverTimestamp(),
-        status: isCompleted ? 'completed' : 'active'
+      await supabase
+        .from('active_plans')
+        .update({
+          returns_received: newReturnsReceived,
+          last_return_date: new Date().toISOString(),
+          status: isCompleted ? 'completed' : 'active'
+        })
+        .eq('id', plan.id);
+
+      // Add transaction
+      await supabase.from('transactions').insert({
+        user_id: user.uid,
+        type: 'profit',
+        amount: `+${plan.daily_return}`,
+        status: 'Completed',
+        title: `Daily Profit: ${plan.name} Plan`,
+        date: new Date().toLocaleDateString(),
+        time: new Date().toLocaleTimeString(),
+      });
+
+      // Add notification
+      await supabase.from('notifications').insert({
+        user_id: user.uid,
+        title: 'Daily Profit Claimed',
+        message: `You successfully claimed ${plan.daily_return} PKR profit from your ${plan.name} plan.`,
+        read: false,
       });
 
       // Refresh plans
@@ -86,7 +118,7 @@ export default function ActivePlan() {
 
   const formatTimeLeft = (lastReturnDate: any) => {
     if (!lastReturnDate) return "00:00:00";
-    const lastDate = lastReturnDate.toDate();
+    const lastDate = new Date(lastReturnDate);
     const nextReturnDate = new Date(lastDate.getTime() + 24 * 60 * 60 * 1000);
     const diff = nextReturnDate.getTime() - now.getTime();
     
@@ -131,11 +163,11 @@ export default function ActivePlan() {
                 <div className="grid grid-cols-2 gap-4 mb-6">
                   <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl transition-colors duration-300">
                     <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Daily Return</p>
-                    <p className="font-bold text-slate-900 dark:text-white">{plan.dailyReturn} PKR</p>
+                    <p className="font-bold text-slate-900 dark:text-white">{plan.daily_return} PKR</p>
                   </div>
                   <div className="bg-slate-50 dark:bg-slate-800 p-4 rounded-2xl transition-colors duration-300">
                     <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Total Earned</p>
-                    <p className="font-bold text-emerald-600 dark:text-emerald-400">{(plan.returnsReceived || 0) * plan.dailyReturn} PKR</p>
+                    <p className="font-bold text-emerald-600 dark:text-emerald-400">{(plan.returns_received || 0) * plan.daily_return} PKR</p>
                   </div>
                 </div>
 
@@ -148,21 +180,21 @@ export default function ActivePlan() {
                       <div>
                         <p className="text-xs text-indigo-600/70 dark:text-indigo-400/70 font-bold uppercase tracking-wider mb-0.5">Next Return In</p>
                         <p className="font-mono font-bold text-indigo-900 dark:text-indigo-100 text-lg tracking-wider">
-                          {canClaim(plan.lastReturnDate) ? "00:00:00" : formatTimeLeft(plan.lastReturnDate)}
+                          {canClaim(plan.last_return_date) ? "00:00:00" : formatTimeLeft(plan.last_return_date)}
                         </p>
                       </div>
                     </div>
                     <div className="text-right">
                       <p className="text-xs text-indigo-600/70 dark:text-indigo-400/70 font-bold uppercase tracking-wider mb-0.5">Returns</p>
-                      <p className="font-bold text-indigo-900 dark:text-indigo-100">{plan.returnsReceived || 0}/{plan.duration}</p>
+                      <p className="font-bold text-indigo-900 dark:text-indigo-100">{plan.returns_received || 0}/{plan.duration}</p>
                     </div>
                   </div>
 
                   <button
                     onClick={() => handleClaim(plan)}
-                    disabled={!canClaim(plan.lastReturnDate) || claiming === plan.id}
+                    disabled={!canClaim(plan.last_return_date) || claiming === plan.id}
                     className={`w-full py-3 rounded-xl font-bold transition-all flex items-center justify-center gap-2 ${
-                      canClaim(plan.lastReturnDate) 
+                      canClaim(plan.last_return_date) 
                         ? 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-lg shadow-indigo-200 dark:shadow-none' 
                         : 'bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-600 cursor-not-allowed'
                     }`}
@@ -172,7 +204,7 @@ export default function ActivePlan() {
                     ) : (
                       <>
                         <TrendingUp size={18} />
-                        {canClaim(plan.lastReturnDate) ? "Claim Daily Profit" : "Wait for Timer"}
+                        {canClaim(plan.last_return_date) ? "Claim Daily Profit" : "Wait for Timer"}
                       </>
                     )}
                   </button>
