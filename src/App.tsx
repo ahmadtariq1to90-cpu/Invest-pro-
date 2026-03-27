@@ -26,7 +26,6 @@ import Terms from './pages/Terms';
 import Contact from './pages/Contact';
 import FAQ from './pages/FAQ';
 import Notifications from './pages/Notifications';
-import AdminDashboard from './pages/admin/AdminDashboard';
 
 // Components
 import Layout from './components/Layout';
@@ -67,7 +66,6 @@ export default function App() {
               <Route path="history" element={<History />} />
               <Route path="support" element={<Support />} />
               <Route path="notifications" element={<Notifications />} />
-              <Route path="admin" element={<AdminDashboard />} />
             </Route>
           </Routes>
         </Router>

@@ -1,52 +1,30 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ArrowLeft, Upload, CheckCircle2, ChevronRight, X } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../store/auth';
 import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
+const METHODS = [
+  { id: 'jazzcash', name: 'JazzCash', logo: 'https://i.ibb.co/39p1XHHh/images-2-fotor-bg-remover-2026022715323.png', account: '03001234567', title: 'Muhammad Ali' },
+  { id: 'easypaisa', name: 'EasyPaisa', logo: 'https://i.ibb.co/YKZV0xm/images-fotor-bg-remover-2026022715449.png', account: '03451234567', title: 'Ahmed Khan' },
+  { id: 'bank', name: 'Bank Transfer', logo: 'https://i.ibb.co/S94BqQd/images-1-fotor-bg-remover-2026022715540.png', account: 'PK12MEZN000123456789', title: 'Invest Pro LLC', bankName: 'Meezan Bank' },
+];
+
 const PRESETS = [100, 250, 500, 1000, 5000, 10000];
 
 export default function Deposit() {
   const [step, setStep] = useState(1);
-  const [methods, setMethods] = useState<any[]>([]);
-  const [method, setMethod] = useState<any>(null);
+  const [method, setMethod] = useState(METHODS[0]);
   const [amount, setAmount] = useState('');
   const [screenshot, setScreenshot] = useState<File | null>(null);
   const [showPopup, setShowPopup] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [fetching, setFetching] = useState(true);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [error, setError] = useState('');
   const [copied, setCopied] = useState(false);
   const navigate = useNavigate();
   const { user } = useAuth();
-
-  useEffect(() => {
-    const fetchMethods = async () => {
-      if (!isSupabaseConfigured) return;
-      
-      setFetching(true);
-      try {
-        const { data, error } = await supabase
-          .from('payment_methods')
-          .select('*')
-          .eq('active', true);
-          
-        if (error) throw error;
-        setMethods(data || []);
-        if (data && data.length > 0) {
-          setMethod(data[0]);
-        }
-      } catch (err: any) {
-        console.error("Error fetching payment methods:", err);
-        setError("Failed to load payment methods.");
-      } finally {
-        setFetching(false);
-      }
-    };
-    fetchMethods();
-  }, []);
 
   const handleNext = () => {
     setError('');
@@ -190,31 +168,25 @@ export default function Deposit() {
               {/* Select Method */}
               <div>
                 <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-4 uppercase tracking-wider">Select Payment Method</h3>
-                {fetching ? (
-                  <div className="flex justify-center py-4">
-                    <div className="w-8 h-8 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-3 gap-3">
-                    {methods.map((m) => (
-                      <button
-                        key={m.id}
-                        onClick={() => setMethod(m)}
-                        className={`relative p-3 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 ${
-                          method?.id === m.id ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/30 shadow-md shadow-indigo-100 dark:shadow-none' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-indigo-300 dark:hover:border-indigo-500'
-                        }`}
-                      >
-                        {method?.id === m.id && (
-                          <div className="absolute -top-2 -right-2 w-6 h-6 bg-indigo-600 rounded-full flex items-center justify-center text-white border-2 border-white dark:border-slate-900">
-                            <CheckCircle2 size={14} />
-                          </div>
-                        )}
-                        <img src={m.logo_url || m.logo} alt={m.name} className="h-8 object-contain" referrerPolicy="no-referrer" />
-                        <span className="text-xs font-bold text-slate-700 dark:text-slate-300">{m.name}</span>
-                      </button>
-                    ))}
-                  </div>
-                )}
+                <div className="grid grid-cols-3 gap-3">
+                  {METHODS.map((m) => (
+                    <button
+                      key={m.id}
+                      onClick={() => setMethod(m)}
+                      className={`relative p-3 rounded-2xl border-2 transition-all flex flex-col items-center gap-2 ${
+                        method.id === m.id ? 'border-indigo-600 bg-indigo-50 dark:bg-indigo-900/30 shadow-md shadow-indigo-100 dark:shadow-none' : 'border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-indigo-300 dark:hover:border-indigo-500'
+                      }`}
+                    >
+                      {method.id === m.id && (
+                        <div className="absolute -top-2 -right-2 w-6 h-6 bg-indigo-600 rounded-full flex items-center justify-center text-white border-2 border-white dark:border-slate-900">
+                          <CheckCircle2 size={14} />
+                        </div>
+                      )}
+                      <img src={m.logo} alt={m.name} className="h-8 object-contain" referrerPolicy="no-referrer" />
+                      <span className="text-xs font-bold text-slate-700 dark:text-slate-300">{m.name}</span>
+                    </button>
+                  ))}
+                </div>
               </div>
 
               {/* Enter Amount */}
@@ -281,26 +253,26 @@ export default function Deposit() {
                 <h3 className="text-sm font-bold text-slate-900 dark:text-white mb-4 uppercase tracking-wider">Payment Details</h3>
                 
                 <div className="space-y-4">
-                  {method?.bank_name && (
+                  {method.id === 'bank' && (
                     <div>
                       <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Bank Name</p>
-                      <p className="font-bold text-slate-900 dark:text-white bg-slate-50 dark:bg-slate-800 p-3 rounded-xl border border-slate-100 dark:border-slate-700 transition-colors duration-300">{method.bank_name}</p>
+                      <p className="font-bold text-slate-900 dark:text-white bg-slate-50 dark:bg-slate-800 p-3 rounded-xl border border-slate-100 dark:border-slate-700 transition-colors duration-300">{(method as any).bankName}</p>
                     </div>
                   )}
                   
                   <div>
                     <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Account Title</p>
-                    <p className="font-bold text-slate-900 dark:text-white bg-slate-50 dark:bg-slate-800 p-3 rounded-xl border border-slate-100 dark:border-slate-700 transition-colors duration-300">{method?.account_title || method?.title}</p>
+                    <p className="font-bold text-slate-900 dark:text-white bg-slate-50 dark:bg-slate-800 p-3 rounded-xl border border-slate-100 dark:border-slate-700 transition-colors duration-300">{method.title}</p>
                   </div>
                   
                   <div>
                     <p className="text-xs text-slate-500 dark:text-slate-400 mb-1">Account Number</p>
                     <div className="flex items-center gap-2">
                       <p className="flex-1 font-mono font-bold text-slate-900 dark:text-white bg-slate-50 dark:bg-slate-800 p-3 rounded-xl border border-slate-100 dark:border-slate-700 tracking-wider transition-colors duration-300">
-                        {method?.account_number || method?.account}
+                        {method.account}
                       </p>
                       <button
-                        onClick={() => copyToClipboard(method?.account_number || method?.account)}
+                        onClick={() => copyToClipboard(method.account)}
                         className="px-4 py-3 bg-indigo-100 dark:bg-indigo-900/50 hover:bg-indigo-200 dark:hover:bg-indigo-800/50 text-indigo-700 dark:text-indigo-300 font-bold rounded-xl transition-colors"
                       >
                         {copied ? 'Copied!' : 'Copy'}

@@ -2,13 +2,10 @@ import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Menu, X, ArrowRight, TrendingUp, Shield, Zap, ChevronUp, Facebook, Twitter, Instagram, Youtube, MessageCircle, Send, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { supabase, isSupabaseConfigured } from '../lib/supabase';
 
 export default function Landing() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showScrollTop, setShowScrollTop] = useState(false);
-  const [plans, setPlans] = useState<any[]>([]);
-  const [loadingPlans, setLoadingPlans] = useState(true);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -20,29 +17,8 @@ export default function Landing() {
     };
 
     window.addEventListener('scroll', handleScroll);
-    fetchPlans();
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-
-  const fetchPlans = async () => {
-    if (!isSupabaseConfigured) {
-      setLoadingPlans(false);
-      return;
-    }
-    try {
-      const { data, error } = await supabase
-        .from('plans')
-        .select('*')
-        .order('price', { ascending: true });
-      
-      if (error) throw error;
-      setPlans(data || []);
-    } catch (err) {
-      console.error("Error fetching plans:", err);
-    } finally {
-      setLoadingPlans(false);
-    }
-  };
 
   const scrollToSection = (id: string) => {
     setIsMenuOpen(false);
@@ -166,32 +142,28 @@ export default function Landing() {
               <p className="text-slate-600 dark:text-slate-400">Choose the plan that fits your goals.</p>
             </div>
             <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-              {loadingPlans ? (
-                <div className="col-span-full flex justify-center py-12">
-                  <div className="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
-                </div>
-              ) : plans.length > 0 ? (
-                plans.map((plan, i) => (
-                  <div key={i} className={`relative p-8 rounded-3xl border transition-colors duration-300 ${plan.popular ? 'bg-indigo-900 border-indigo-800 text-white shadow-2xl scale-105 z-10' : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white'}`}>
-                    {plan.popular && <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-gradient-to-r from-indigo-500 to-violet-500 text-white text-sm font-bold rounded-full">Most Popular</div>}
-                    <h3 className={`text-2xl font-bold mb-2 ${plan.popular ? 'text-white' : 'text-slate-900 dark:text-white'}`}>{plan.name} Plan</h3>
-                    <div className="flex items-baseline gap-1 mb-6">
-                      <span className="text-4xl font-extrabold">{plan.price}</span>
-                      <span className={plan.popular ? 'text-indigo-200' : 'text-slate-500 dark:text-slate-400'}>PKR</span>
-                    </div>
-                    <ul className={`space-y-4 mb-8 ${plan.popular ? 'text-indigo-100' : 'text-slate-600 dark:text-slate-400'}`}>
-                      <li className="flex justify-between"><span>Daily Return:</span> <span className="font-semibold">{plan.daily_return} PKR</span></li>
-                      <li className="flex justify-between"><span>Total Return:</span> <span className="font-semibold">{plan.total_return} PKR</span></li>
-                      <li className="flex justify-between"><span>Duration:</span> <span className="font-semibold">{plan.duration} Days</span></li>
-                    </ul>
-                    <Link to="/register" className={`block w-full py-4 rounded-xl font-bold text-center transition-all ${plan.popular ? 'bg-white text-indigo-900 hover:bg-slate-100' : 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-800/50'}`}>
-                      Start Investing
-                    </Link>
+              {[
+                { name: 'Silver', price: 100, daily: 5, total: 150, duration: 30 },
+                { name: 'Gold', price: 500, daily: 30, total: 900, duration: 30, popular: true },
+                { name: 'Platinum', price: 1000, daily: 70, total: 2100, duration: 30 },
+              ].map((plan, i) => (
+                <div key={i} className={`relative p-8 rounded-3xl border transition-colors duration-300 ${plan.popular ? 'bg-indigo-900 border-indigo-800 text-white shadow-2xl scale-105 z-10' : 'bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 text-slate-900 dark:text-white'}`}>
+                  {plan.popular && <div className="absolute -top-4 left-1/2 -translate-x-1/2 px-4 py-1 bg-gradient-to-r from-indigo-500 to-violet-500 text-white text-sm font-bold rounded-full">Most Popular</div>}
+                  <h3 className={`text-2xl font-bold mb-2 ${plan.popular ? 'text-white' : 'text-slate-900 dark:text-white'}`}>{plan.name} Plan</h3>
+                  <div className="flex items-baseline gap-1 mb-6">
+                    <span className="text-4xl font-extrabold">{plan.price}</span>
+                    <span className={plan.popular ? 'text-indigo-200' : 'text-slate-500 dark:text-slate-400'}>PKR</span>
                   </div>
-                ))
-              ) : (
-                <div className="col-span-full text-center py-12 text-slate-500">No plans available at the moment.</div>
-              )}
+                  <ul className={`space-y-4 mb-8 ${plan.popular ? 'text-indigo-100' : 'text-slate-600 dark:text-slate-400'}`}>
+                    <li className="flex justify-between"><span>Daily Return:</span> <span className="font-semibold">{plan.daily} PKR</span></li>
+                    <li className="flex justify-between"><span>Total Return:</span> <span className="font-semibold">{plan.total} PKR</span></li>
+                    <li className="flex justify-between"><span>Duration:</span> <span className="font-semibold">{plan.duration} Days</span></li>
+                  </ul>
+                  <Link to="/register" className={`block w-full py-4 rounded-xl font-bold text-center transition-all ${plan.popular ? 'bg-white text-indigo-900 hover:bg-slate-100' : 'bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300 hover:bg-indigo-100 dark:hover:bg-indigo-800/50'}`}>
+                    Start Investing
+                  </Link>
+                </div>
+              ))}
             </div>
           </div>
         </section>
