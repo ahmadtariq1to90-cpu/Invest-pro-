@@ -1,54 +1,71 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { ArrowLeft, ChevronDown, HelpCircle, Send, MessageSquare } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
+import { supabase, isSupabaseConfigured } from '../lib/supabase';
+import { useAuth } from '../store/auth';
 
 export default function FAQ() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [openIndex, setOpenIndex] = useState<number | null>(null);
+  const [faqs, setFaqs] = useState<any[]>([]);
   const [question, setQuestion] = useState('');
   const [loading, setLoading] = useState(false);
+  const [fetching, setFetching] = useState(true);
   const [success, setSuccess] = useState(false);
 
-  const faqs = [
-    {
-      q: "What is Invest Pro?",
-      a: "Invest Pro is a secure digital investment platform that allows you to grow your wealth through carefully managed daily return plans."
-    },
-    {
-      q: "How do I start investing?",
-      a: "Simply create an account, deposit funds using your preferred payment method, and choose an investment plan that suits your goals."
-    },
-    {
-      q: "Are my investments secure?",
-      a: "Yes, we use bank-grade encryption and security protocols to ensure your funds and personal information are always protected."
-    },
-    {
-      q: "How do withdrawals work?",
-      a: "You can request a withdrawal at any time. Processing times vary depending on the method chosen, but typically take 24-48 hours."
-    },
-    {
-      q: "Can I have multiple active plans?",
-      a: "Yes, you can invest in multiple plans simultaneously to diversify your portfolio and maximize your daily returns."
-    }
-  ];
+  useEffect(() => {
+    const fetchFaqs = async () => {
+      if (!isSupabaseConfigured) return;
+      
+      setFetching(true);
+      try {
+        const { data, error } = await supabase
+          .from('faqs')
+          .select('*')
+          .eq('active', true)
+          .order('order', { ascending: true });
+          
+        if (error) throw error;
+        setFaqs(data || []);
+      } catch (err: any) {
+        console.error("Error fetching FAQs:", err);
+      } finally {
+        setFetching(false);
+      }
+    };
+    fetchFaqs();
+  }, []);
 
   const toggleFAQ = (index: number) => {
     setOpenIndex(openIndex === index ? null : index);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!question.trim()) return;
+    if (!question.trim() || !isSupabaseConfigured) return;
     
     setLoading(true);
-    // Simulate API call
-    setTimeout(() => {
-      setLoading(false);
+    try {
+      const { error } = await supabase.from('faq_submissions').insert({
+        user_id: user?.uid || null,
+        question: question.trim(),
+        status: 'pending',
+        created_at: new Date().toISOString()
+      });
+
+      if (error) throw error;
+
       setSuccess(true);
       setQuestion('');
       setTimeout(() => setSuccess(false), 3000);
-    }, 1500);
+    } catch (err: any) {
+      console.error("Error submitting question:", err);
+      alert("Failed to submit question. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -80,40 +97,51 @@ export default function FAQ() {
         </div>
 
         <div className="space-y-4 mb-16">
-          {faqs.map((faq, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-              className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden transition-colors duration-300"
-            >
-              <button
-                onClick={() => toggleFAQ(index)}
-                className="w-full px-6 py-5 flex items-center justify-between text-left focus:outline-none"
+          {fetching ? (
+            <div className="flex flex-col items-center justify-center py-10 gap-4">
+              <div className="w-10 h-10 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
+              <p className="text-slate-500 dark:text-slate-400 font-medium">Loading FAQs...</p>
+            </div>
+          ) : faqs.length > 0 ? (
+            faqs.map((faq, index) => (
+              <motion.div
+                key={index}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+                className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden transition-colors duration-300"
               >
-                <span className="font-bold text-slate-900 dark:text-white text-lg pr-8">{faq.q}</span>
-                <ChevronDown 
-                  className={`text-slate-400 dark:text-slate-500 transition-transform duration-300 flex-shrink-0 ${openIndex === index ? 'rotate-180' : ''}`} 
-                  size={24} 
-                />
-              </button>
-              <AnimatePresence>
-                {openIndex === index && (
-                  <motion.div
-                    initial={{ height: 0, opacity: 0 }}
-                    animate={{ height: 'auto', opacity: 1 }}
-                    exit={{ height: 0, opacity: 0 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <div className="px-6 pb-5 text-slate-600 dark:text-slate-400 leading-relaxed border-t border-slate-100 dark:border-slate-800/50 pt-4">
-                      {faq.a}
-                    </div>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </motion.div>
-          ))}
+                <button
+                  onClick={() => toggleFAQ(index)}
+                  className="w-full px-6 py-5 flex items-center justify-between text-left focus:outline-none"
+                >
+                  <span className="font-bold text-slate-900 dark:text-white text-lg pr-8">{faq.question || faq.q}</span>
+                  <ChevronDown 
+                    className={`text-slate-400 dark:text-slate-500 transition-transform duration-300 flex-shrink-0 ${openIndex === index ? 'rotate-180' : ''}`} 
+                    size={24} 
+                  />
+                </button>
+                <AnimatePresence>
+                  {openIndex === index && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.3 }}
+                    >
+                      <div className="px-6 pb-5 text-slate-600 dark:text-slate-400 leading-relaxed border-t border-slate-100 dark:border-slate-800/50 pt-4">
+                        {faq.answer || faq.a}
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            ))
+          ) : (
+            <div className="text-center py-10 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
+              <p className="text-slate-500 dark:text-slate-400">No FAQs available at the moment.</p>
+            </div>
+          )}
         </div>
 
         {/* Submit Question Form */}

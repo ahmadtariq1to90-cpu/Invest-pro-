@@ -6,11 +6,13 @@ interface User {
   email: string | null;
   displayName: string | null;
   photoURL?: string | null;
+  role?: string;
 }
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
+  isAdmin: boolean;
   login: (user: User) => void;
   logout: () => void;
 }
@@ -18,6 +20,7 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType>({
   user: null,
   loading: true,
+  isAdmin: false,
   login: () => {},
   logout: () => {},
 });
@@ -28,37 +31,60 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
+  const fetchUserRole = async (uid: string, baseUser: any) => {
+    try {
+      const { data, error } = await supabase
+        .from('users')
+        .select('role')
+        .eq('id', uid)
+        .single();
+        
+      if (data && !error) {
+        setUser({ ...baseUser, role: data.role });
+      } else {
+        setUser(baseUser);
+      }
+    } catch (err) {
+      console.error("Error fetching user role:", err);
+      setUser(baseUser);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (isSupabaseConfigured) {
       // Get initial session
       supabase.auth.getSession().then(({ data: { session } }) => {
         if (session?.user) {
-          setUser({
+          const baseUser = {
             uid: session.user.id,
             email: session.user.email || null,
             displayName: session.user.user_metadata?.displayName || null,
             photoURL: session.user.user_metadata?.photoURL || null,
-          });
+          };
+          fetchUserRole(session.user.id, baseUser);
         } else {
           setUser(null);
+          setLoading(false);
         }
-        setLoading(false);
       });
 
       // Listen for auth changes
       const { data: { subscription } } = supabase.auth.onAuthStateChange(
         (_event, session) => {
           if (session?.user) {
-            setUser({
+            const baseUser = {
               uid: session.user.id,
               email: session.user.email || null,
               displayName: session.user.user_metadata?.displayName || null,
               photoURL: session.user.user_metadata?.photoURL || null,
-            });
+            };
+            fetchUserRole(session.user.id, baseUser);
           } else {
             setUser(null);
+            setLoading(false);
           }
-          setLoading(false);
         }
       );
 
@@ -91,7 +117,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout }}>
+    <AuthContext.Provider value={{ user, loading, isAdmin: user?.role === 'admin', login, logout }}>
       {children}
     </AuthContext.Provider>
   );

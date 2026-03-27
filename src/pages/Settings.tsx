@@ -3,10 +3,11 @@ import { ArrowLeft, User, TrendingUp, ArrowDownToLine, ArrowUpFromLine, Clock, U
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../store/auth';
 import { useTheme } from '../store/theme';
+import { ShieldAlert } from 'lucide-react';
 
 export default function Settings() {
   const navigate = useNavigate();
-  const { logout } = useAuth();
+  const { logout, isAdmin } = useAuth();
   const { theme, toggleTheme } = useTheme();
 
   const handleLogout = () => {
@@ -16,6 +17,12 @@ export default function Settings() {
   };
 
   const menuGroups = [
+    ...(isAdmin ? [{
+      title: 'Administration',
+      items: [
+        { icon: ShieldAlert, label: 'Admin Dashboard', path: '/app/admin', color: 'text-red-600 bg-red-50 dark:bg-red-900/30 dark:text-red-400' },
+      ]
+    }] : []),
     {
       title: 'Preferences',
       items: [
