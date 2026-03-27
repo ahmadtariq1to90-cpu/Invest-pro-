@@ -99,18 +99,18 @@ export default function Login() {
             </div>
             <div className="flex flex-col">
               <span className="font-display font-black text-3xl tracking-tighter leading-none">INVEST PRO</span>
-              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-400/80">Institutional Terminal</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-400/80">Investor Portal</span>
             </div>
           </div>
 
           <h1 className="text-7xl font-display font-black tracking-tighter leading-[0.9] mb-10">
             SECURE <br />
-            <span className="text-white/30">CAPITAL</span> <br />
+            <span className="text-white/30">INVESTMENT</span> <br />
             ACCESS.
           </h1>
 
           <p className="text-xl text-white/40 mb-12 max-w-md leading-relaxed font-medium">
-            Enter the protocol's secure gateway. Your institutional-grade dashboard awaits with real-time yield analytics and portfolio management.
+            Enter your secure investment portal. Your dashboard awaits with real-time analytics and portfolio management.
           </p>
 
           <div className="grid grid-cols-2 gap-8">
@@ -175,7 +175,7 @@ export default function Login() {
                           Welcome <Sparkles className="text-indigo-400 w-8 h-8 animate-pulse" />
                         </h3>
                         <p className="text-sm text-white/40 font-medium leading-relaxed">
-                          Access your institutional-grade portfolio with secure authentication.
+                          Access your investment dashboard with secure authentication.
                         </p>
                       </div>
 
@@ -190,7 +190,7 @@ export default function Login() {
                             value={email}
                             onChange={(e) => setEmail(e.target.value)}
                             className="block w-full pl-16 pr-8 py-6 bg-white/5 border border-white/10 rounded-3xl text-white placeholder-white/20 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500/50 transition-all font-medium"
-                            placeholder="Institutional Email"
+                            placeholder="Email Address"
                           />
                         </div>
                         {error && (
@@ -293,7 +293,7 @@ export default function Login() {
                               <CheckCircle2 className="absolute text-white w-4 h-4 opacity-0 peer-checked:opacity-100 transition-opacity" strokeWidth={3} />
                             </div>
                             <span className="text-[10px] font-black uppercase tracking-widest text-white/30 group-hover:text-white/50 transition-colors">
-                              Accept <Link to="/terms" className="text-indigo-400 hover:underline">Protocols</Link>
+                              Accept <Link to="/terms" className="text-indigo-400 hover:underline">Terms</Link>
                             </span>
                           </label>
 
@@ -339,10 +339,10 @@ export default function Login() {
                       <Lock size={40} strokeWidth={2.5} />
                     </div>
                     <h3 className="text-4xl font-display font-black text-white mb-6 tracking-tighter">
-                      Protocol Recovery
+                      Account Recovery
                     </h3>
                     <p className="text-sm text-white/40 mb-12 leading-relaxed font-medium">
-                      For institutional security, password resets are handled manually by our senior support desk.
+                      For account security, password resets are handled manually by our support team.
                     </p>
 
                     <div className="space-y-6 mb-12">
@@ -401,7 +401,7 @@ export default function Login() {
                 ACCESS GRANTED
               </h3>
               <p className="text-sm text-white/40 mb-12 leading-relaxed font-medium">
-                Authentication successful. Synchronizing your institutional terminal...
+                Authentication successful. Synchronizing your dashboard...
               </p>
               <div className="flex justify-center">
                 <div className="w-32 h-2 bg-white/5 rounded-full overflow-hidden relative">

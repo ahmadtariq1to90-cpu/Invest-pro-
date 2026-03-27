@@ -188,12 +188,12 @@ export default function Dashboard() {
               </div>
 
               <h3 className="text-3xl font-bold tracking-tight mb-3 font-display">
-                Institutional Access
+                Welcome Back
               </h3>
               <p className="text-white/60 mb-8 leading-relaxed text-lg">
-                Welcome to the elite tier of capital management. Your institutional-grade dashboard is now active.
+                Your investment dashboard is now active. Start growing your wealth today.
               </p>
-
+ 
               <div className="flex flex-col gap-3">
                 <a
                   href="https://whatsapp.com/channel/investpro"
@@ -208,7 +208,7 @@ export default function Dashboard() {
                   onClick={handleCloseWelcome}
                   className="w-full py-4 rounded-2xl font-bold text-white/60 hover:text-white hover:bg-white/5 transition-all"
                 >
-                  Enter Terminal
+                  Go to Dashboard
                 </button>
               </div>
             </motion.div>
@@ -256,8 +256,8 @@ export default function Dashboard() {
               </div>
             </Link>
             <div>
-              <p className="text-white/40 text-[10px] font-bold uppercase tracking-[0.3em] mb-1">Capital Management</p>
-              <h2 className="text-2xl font-bold tracking-tight font-display">
+              <p className="text-white/40 text-[10px] font-bold uppercase tracking-[0.3em] mb-1">Investor</p>
+              <h2 className="text-xl md:text-2xl font-bold tracking-tight font-display">
                 {user?.displayName?.split(' ')[0] || "Investor"}
               </h2>
             </div>
@@ -302,36 +302,36 @@ export default function Dashboard() {
             </div>
             
             <div className="space-y-1 mb-10">
-              <p className="text-white/40 text-xs font-medium tracking-wide">Total Portfolio Value</p>
+              <p className="text-white/40 text-xs font-medium tracking-wide">Total Balance</p>
               <div className="flex items-baseline gap-3">
-                <h1 className="text-6xl font-bold tracking-tighter font-display">
+                <h1 className="text-4xl md:text-6xl font-bold tracking-tighter font-display">
                   {showBalance ? (userData?.balance || 0).toLocaleString() : "••••••••"}
                 </h1>
-                <span className="text-xl text-white/20 font-medium tracking-widest">PKR</span>
+                <span className="text-lg md:text-xl text-white/20 font-medium tracking-widest">PKR</span>
               </div>
             </div>
-
+ 
             <div className="grid grid-cols-2 gap-4">
-              <Link to="/app/deposit" className="flex items-center justify-center gap-2 bg-white text-black py-4 rounded-2xl font-bold hover:bg-white/90 transition-all active:scale-95 shadow-lg shadow-white/10">
+              <Link to="/app/deposit" className="flex items-center justify-center gap-2 bg-white text-black py-4 rounded-2xl font-bold hover:bg-white/90 transition-all active:scale-95 shadow-lg shadow-white/10 text-sm md:text-base">
                 <Plus size={20} /> Deposit
               </Link>
-              <Link to="/app/withdraw" className="flex items-center justify-center gap-2 bg-white/5 text-white py-4 rounded-2xl font-bold border border-white/10 hover:bg-white/10 transition-all active:scale-95">
+              <Link to="/app/withdraw" className="flex items-center justify-center gap-2 bg-white/5 text-white py-4 rounded-2xl font-bold border border-white/10 hover:bg-white/10 transition-all active:scale-95 text-sm md:text-base">
                 <ArrowUpFromLine size={20} /> Withdraw
               </Link>
             </div>
-
+ 
             <div className="mt-10 pt-8 border-t border-white/5 grid grid-cols-2 gap-8">
               <div className="space-y-1">
-                <p className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em]">Liquid Assets</p>
-                <p className="text-xl font-bold font-display">
+                <p className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em]">Available Balance</p>
+                <p className="text-lg md:text-xl font-bold font-display">
                   {showBalance ? (userData?.deposit_balance || 0).toLocaleString() : "••••"} <span className="text-xs text-white/20">PKR</span>
                 </p>
               </div>
               <div className="space-y-1 text-right">
-                <p className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em]">Yielding Plans</p>
+                <p className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em]">Active Plans</p>
                 <div className="flex items-center justify-end gap-2">
                   <TrendingUp size={16} className="text-emerald-400" />
-                  <p className="text-xl font-bold text-emerald-400 font-display">
+                  <p className="text-lg md:text-xl font-bold text-emerald-400 font-display">
                     {userData?.active_plans_count || 0} <span className="text-xs opacity-60">Active</span>
                   </p>
                 </div>
@@ -345,12 +345,12 @@ export default function Dashboard() {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
-          className="bg-[#0a0a0a] rounded-[2.5rem] p-8 border border-white/5 relative overflow-hidden"
+          className="bg-[#0a0a0a] rounded-[2.5rem] p-6 md:p-8 border border-white/5 relative overflow-hidden"
         >
           <div className="flex justify-between items-center mb-8">
             <div>
-              <h3 className="text-xl font-bold tracking-tight font-display">Yield Analytics</h3>
-              <p className="text-xs text-white/40">7-day performance projection</p>
+              <h3 className="text-lg md:text-xl font-bold tracking-tight font-display">Daily Returns</h3>
+              <p className="text-xs text-white/40">7-day profit projection</p>
             </div>
             <div className="w-10 h-10 glass rounded-xl flex items-center justify-center">
               <BarChart3 size={18} className="text-indigo-400" />
@@ -388,7 +388,7 @@ export default function Dashboard() {
               <div className="w-10 h-10 bg-violet-500/10 rounded-xl flex items-center justify-center border border-violet-500/20">
                 <PieChartIcon size={18} className="text-violet-400" />
               </div>
-              <h3 className="text-lg font-bold tracking-tight font-display">Asset Allocation</h3>
+              <h3 className="text-lg font-bold tracking-tight font-display">Portfolio</h3>
             </div>
             
             <div className="flex items-center gap-8">
@@ -433,7 +433,7 @@ export default function Dashboard() {
               <div className="w-10 h-10 bg-emerald-500/10 rounded-xl flex items-center justify-center border border-emerald-500/20">
                 <Zap size={18} className="text-emerald-400" />
               </div>
-              <h3 className="text-lg font-bold tracking-tight font-display">Yield Projection</h3>
+              <h3 className="text-lg font-bold tracking-tight font-display">Growth Goal</h3>
             </div>
             
             <div className="space-y-6">
@@ -465,7 +465,7 @@ export default function Dashboard() {
         <div className="space-y-6">
           <div className="flex justify-between items-end">
             <div>
-              <p className="text-white/40 text-[10px] font-bold uppercase tracking-[0.3em] mb-1">Transaction Log</p>
+              <p className="text-white/40 text-[10px] font-bold uppercase tracking-[0.3em] mb-1">History</p>
               <h3 className="text-2xl font-bold tracking-tight font-display">Recent Activity</h3>
             </div>
             <div className="relative">
@@ -554,12 +554,12 @@ export default function Dashboard() {
 
         {/* Security Banner */}
         <div className="bg-gradient-to-r from-indigo-500/10 to-violet-500/10 rounded-3xl p-6 border border-white/5 flex items-center gap-4">
-          <div className="w-12 h-12 glass rounded-2xl flex items-center justify-center">
+          <div className="w-12 h-12 glass rounded-2xl flex items-center justify-center flex-shrink-0">
             <Shield className="text-indigo-400" size={24} />
           </div>
           <div>
-            <p className="text-sm font-bold">Institutional Security Active</p>
-            <p className="text-xs text-white/40">End-to-end encryption & cold storage enabled</p>
+            <p className="text-sm font-bold">Secure Account Active</p>
+            <p className="text-xs text-white/40">Your account is protected by advanced security</p>
           </div>
         </div>
       </div>

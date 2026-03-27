@@ -136,18 +136,18 @@ export default function Register() {
             </div>
             <div className="flex flex-col">
               <span className="font-display font-black text-3xl tracking-tighter leading-none">INVEST PRO</span>
-              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-400/80">Institutional Protocol</span>
+              <span className="text-[10px] font-black uppercase tracking-[0.3em] text-indigo-400/80">Investor Network</span>
             </div>
           </div>
 
           <h1 className="text-7xl font-display font-black tracking-tighter leading-[0.9] mb-10">
             JOIN THE <br />
-            <span className="text-white/30">ELITE</span> <br />
+            <span className="text-white/30">INVESTMENT</span> <br />
             NETWORK.
           </h1>
 
           <p className="text-xl text-white/40 mb-12 max-w-md leading-relaxed font-medium">
-            Become part of the world's most advanced yield generation protocol. Secure your financial future with institutional-grade tools.
+            Become part of the world's most advanced investment network. Secure your financial future with professional tools.
           </p>
 
           <div className="grid grid-cols-2 gap-8">
@@ -188,7 +188,7 @@ export default function Register() {
               >
                 <ArrowLeft size={20} strokeWidth={2.5} />
               </Link>
-              <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40">Create Protocol Account</h2>
+              <h2 className="text-[10px] font-black uppercase tracking-[0.3em] text-white/40">Create Your Account</h2>
               <div className="w-12"></div>
             </div>
 
@@ -366,10 +366,10 @@ export default function Register() {
                 <CheckCircle2 size={56} strokeWidth={3} />
               </div>
               <h3 className="text-4xl font-display font-black text-white mb-4 tracking-tighter">
-                WELCOME ABOARD!
+                WELCOME!
               </h3>
               <p className="text-sm text-white/40 mb-12 leading-relaxed font-medium">
-                Your institutional account has been successfully created. Redirecting to authentication...
+                Your account has been successfully created. Redirecting to login...
               </p>
               <div className="flex justify-center">
                 <div className="w-32 h-2 bg-white/5 rounded-full overflow-hidden relative">

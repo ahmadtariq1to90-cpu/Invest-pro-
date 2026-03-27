@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, X, ArrowRight, TrendingUp, Shield, Zap, ChevronUp, Facebook, Twitter, Instagram, Youtube, Send, Globe, Users, BarChart3, CheckCircle2, Play, ExternalLink } from 'lucide-react';
+import { Menu, X, ArrowRight, TrendingUp, Shield, Zap, ChevronUp, Facebook, Twitter, Instagram, Youtube, Send, Globe, Users, BarChart3, CheckCircle2, Play, ExternalLink, Mail } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 export default function Landing() {
@@ -39,10 +39,10 @@ export default function Landing() {
   ];
 
   const stats = [
-    { label: 'Active Capital', value: '$42.8M+' },
-    { label: 'Daily Yield', value: 'Up to 12%' },
-    { label: 'Global Nodes', value: '1,240+' },
-    { label: 'Uptime', value: '99.99%' },
+    { label: 'Active Capital', value: '$42M+' },
+    { label: 'Daily Profit', value: 'Up to 12%' },
+    { label: 'Users', value: '10K+' },
+    { label: 'Uptime', value: '99.9%' },
   ];
 
   return (
@@ -65,7 +65,7 @@ export default function Landing() {
               </div>
               <div className="flex flex-col">
                 <span className="font-display font-black text-2xl tracking-tighter leading-none">INVEST PRO</span>
-                <span className="text-[9px] font-black uppercase tracking-[0.3em] text-indigo-400/80">Institutional Grade</span>
+                <span className="text-[9px] font-black uppercase tracking-[0.3em] text-indigo-400/80">Secure Investment</span>
               </div>
             </div>
             
@@ -152,50 +152,50 @@ export default function Landing() {
 
       <main>
         {/* Hero Section - Split Layout */}
-        <section id="home" className="relative pt-48 pb-32 px-6 sm:px-8 lg:px-12 max-w-7xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-20 items-center">
+        <section id="home" className="relative pt-32 md:pt-48 pb-20 md:pb-32 px-6 sm:px-8 lg:px-12 max-w-7xl mx-auto">
+          <div className="grid lg:grid-cols-2 gap-12 md:gap-20 items-center">
             <motion.div
               initial={{ opacity: 0, x: -50 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ duration: 1, ease: [0.16, 1, 0.3, 1] }}
             >
-              <div className="inline-flex items-center gap-3 px-4 py-2 bg-indigo-500/10 border border-indigo-500/20 rounded-full text-[10px] font-black uppercase tracking-[0.3em] text-indigo-400 mb-10">
+              <div className="inline-flex items-center gap-3 px-4 py-2 bg-indigo-500/10 border border-indigo-500/20 rounded-full text-[10px] font-black uppercase tracking-[0.2em] md:tracking-[0.3em] text-indigo-400 mb-8 md:mb-10">
                 <span className="relative flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-indigo-400 opacity-75"></span>
                   <span className="relative inline-flex rounded-full h-2 w-2 bg-indigo-500"></span>
                 </span>
-                Institutional Yield Protocol v2.5
+                Daily Returns Platform
               </div>
               
-              <h1 className="text-[clamp(3.5rem,8vw,7rem)] font-display font-black leading-[0.85] tracking-tighter mb-10">
-                CAPITAL <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-white to-violet-400 bg-[length:200%_auto] animate-gradient">EVOLUTION.</span>
+              <h1 className="text-[clamp(2.5rem,8vw,6rem)] font-display font-black leading-[0.95] md:leading-[0.9] tracking-tighter mb-6 md:mb-10">
+                INVEST & <br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 via-white to-violet-400 bg-[length:200%_auto] animate-gradient text-nowrap">GROW.</span>
               </h1>
               
-              <p className="text-xl text-white/50 mb-12 max-w-xl leading-relaxed font-medium">
-                Experience the next frontier of wealth generation. Our proprietary algorithms deliver consistent, institutional-grade returns in a secure, decentralized environment.
+              <p className="text-base md:text-xl text-white/50 mb-8 md:mb-12 max-w-xl leading-relaxed font-medium">
+                The easiest way to grow your money. Get daily returns on your investment with our secure and trusted platform.
               </p>
               
-              <div className="flex flex-col sm:flex-row items-center gap-6">
+              <div className="flex flex-col sm:flex-row items-center gap-4 md:gap-6 w-full sm:w-auto">
                 <Link 
                   to="/register" 
-                  className="w-full sm:w-auto px-12 py-6 bg-white text-black hover:bg-indigo-500 hover:text-white rounded-full font-black text-lg transition-all shadow-2xl shadow-white/10 flex items-center justify-center gap-3 hover:-translate-y-1.5 active:scale-95"
+                  className="w-full sm:w-auto px-8 md:px-12 py-5 md:py-6 bg-white text-black hover:bg-indigo-500 hover:text-white rounded-full font-black text-base md:text-lg transition-all shadow-2xl shadow-white/10 flex items-center justify-center gap-3 hover:-translate-y-1.5 active:scale-95"
                 >
-                  Launch Terminal <ArrowRight size={24} strokeWidth={3} />
+                  Start Now <ArrowRight size={20} md:size={24} strokeWidth={3} />
                 </Link>
                 <button 
                   onClick={() => scrollToSection('plans')}
-                  className="w-full sm:w-auto px-12 py-6 bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-full font-black text-lg transition-all flex items-center justify-center gap-3 hover:-translate-y-1.5 active:scale-95"
+                  className="w-full sm:w-auto px-8 md:px-12 py-5 md:py-6 bg-white/5 hover:bg-white/10 text-white border border-white/10 rounded-full font-black text-base md:text-lg transition-all flex items-center justify-center gap-3 hover:-translate-y-1.5 active:scale-95"
                 >
-                  View Yields
+                  View Plans
                 </button>
               </div>
 
-              <div className="mt-20 grid grid-cols-2 sm:grid-cols-4 gap-10">
+              <div className="mt-12 md:mt-20 grid grid-cols-2 sm:grid-cols-4 gap-8 md:gap-10">
                 {stats.map((stat, i) => (
                   <div key={i}>
-                    <p className="text-3xl font-display font-black tracking-tighter">{stat.value}</p>
-                    <p className="text-[9px] font-black text-white/40 uppercase tracking-widest mt-1">{stat.label}</p>
+                    <p className="text-2xl md:text-3xl font-display font-black tracking-tighter">{stat.value}</p>
+                    <p className="text-[8px] md:text-[9px] font-black text-white/40 uppercase tracking-widest mt-1">{stat.label}</p>
                   </div>
                 ))}
               </div>
@@ -219,20 +219,20 @@ export default function Landing() {
                           <BarChart3 className="text-indigo-400" size={24} strokeWidth={2.5} />
                         </div>
                         <div>
-                          <h4 className="font-black text-white text-lg tracking-tight">Real-time Alpha</h4>
-                          <p className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em]">Global Market Feed</p>
+                          <h4 className="font-black text-white text-lg tracking-tight">Daily Profits</h4>
+                          <p className="text-[9px] font-black text-white/30 uppercase tracking-[0.2em]">Live Investment Data</p>
                         </div>
                       </div>
                       <div className="px-4 py-1.5 bg-indigo-500/10 text-indigo-400 rounded-full text-[10px] font-black uppercase tracking-widest border border-indigo-500/20">
                         Live Tracking
                       </div>
                     </div>
-
+ 
                     <div className="space-y-8">
                       {[
-                        { label: 'Yield Projection', val: 88, color: 'from-indigo-500 to-violet-500' },
-                        { label: 'Risk Mitigation', val: 94, color: 'from-blue-500 to-indigo-500' },
-                        { label: 'Liquidity Depth', val: 76, color: 'from-violet-500 to-purple-500' }
+                        { label: 'Profit Projection', val: 88, color: 'from-indigo-500 to-violet-500' },
+                        { label: 'Security Level', val: 94, color: 'from-blue-500 to-indigo-500' },
+                        { label: 'Market Depth', val: 76, color: 'from-violet-500 to-purple-500' }
                       ].map((item, i) => (
                         <div key={i} className="space-y-3">
                           <div className="flex justify-between items-end">
@@ -281,70 +281,69 @@ export default function Landing() {
         </section>
 
         {/* About Section - Editorial Style */}
-        <section id="about" className="py-40 px-6 sm:px-8 lg:px-12 relative overflow-hidden">
+        <section id="about" className="py-24 md:py-40 px-6 sm:px-8 lg:px-12 relative overflow-hidden">
           <div className="max-w-7xl mx-auto">
-            <div className="grid lg:grid-cols-2 gap-32 items-center">
+            <div className="grid lg:grid-cols-2 gap-16 md:gap-32 items-center">
               <div className="relative order-2 lg:order-1">
-                <div className="absolute -top-20 -left-20 w-64 h-64 bg-indigo-600/20 rounded-full blur-[100px]"></div>
-                <div className="relative z-10 grid grid-cols-2 gap-6">
-                  <div className="space-y-6 pt-12">
-                    <div className="aspect-[4/5] bg-white/5 rounded-[3rem] border border-white/10 p-8 flex flex-col justify-end group hover:bg-white/10 transition-all">
-                      <Users size={40} className="text-indigo-400 mb-6" />
-                      <h4 className="text-4xl font-display font-black tracking-tighter">50K+</h4>
-                      <p className="text-[10px] font-black uppercase tracking-widest text-white/40 mt-2">Active Nodes</p>
+                <div className="absolute -top-10 md:-top-20 -left-10 md:-left-20 w-48 md:w-64 h-48 md:h-64 bg-indigo-600/20 rounded-full blur-[80px] md:blur-[100px]"></div>
+                <div className="relative z-10 grid grid-cols-2 gap-4 md:gap-6">
+                  <div className="space-y-4 md:space-y-6 pt-8 md:pt-12">
+                    <div className="aspect-[4/5] bg-white/5 rounded-[2rem] md:rounded-[3rem] border border-white/10 p-6 md:p-8 flex flex-col justify-end group hover:bg-white/10 transition-all">
+                      <Users size={32} md:size={40} className="text-indigo-400 mb-4 md:mb-6" />
+                      <h4 className="text-3xl md:text-4xl font-display font-black tracking-tighter">10K+</h4>
+                      <p className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-white/40 mt-1 md:mt-2">Active Users</p>
                     </div>
-                    <div className="aspect-square bg-indigo-600 rounded-[3rem] p-8 flex flex-col justify-end shadow-2xl shadow-indigo-900/40">
-                      <Globe size={40} className="text-white mb-6" />
-                      <h4 className="text-4xl font-display font-black tracking-tighter text-white">120+</h4>
-                      <p className="text-[10px] font-black uppercase tracking-widest text-white/70 mt-2">Regions</p>
+                    <div className="aspect-square bg-indigo-600 rounded-[2rem] md:rounded-[3rem] p-6 md:p-8 flex flex-col justify-end shadow-2xl shadow-indigo-900/40">
+                      <Globe size={32} md:size={40} className="text-white mb-4 md:mb-6" />
+                      <h4 className="text-3xl md:text-4xl font-display font-black tracking-tighter text-white">120+</h4>
+                      <p className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-white/70 mt-1 md:mt-2">Countries</p>
                     </div>
                   </div>
-                  <div className="space-y-6">
-                    <div className="aspect-square bg-white/5 rounded-[3rem] border border-white/10 p-8 flex flex-col justify-end group hover:bg-white/10 transition-all">
-                      <Shield size={40} className="text-indigo-400 mb-6" />
-                      <h4 className="text-4xl font-display font-black tracking-tighter">100%</h4>
-                      <p className="text-[10px] font-black uppercase tracking-widest text-white/40 mt-2">Audited</p>
+                  <div className="space-y-4 md:space-y-6">
+                    <div className="aspect-square bg-white/5 rounded-[2rem] md:rounded-[3rem] border border-white/10 p-6 md:p-8 flex flex-col justify-end group hover:bg-white/10 transition-all">
+                      <Shield size={32} md:size={40} className="text-indigo-400 mb-4 md:mb-6" />
+                      <h4 className="text-3xl md:text-4xl font-display font-black tracking-tighter">100%</h4>
+                      <p className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-white/40 mt-1 md:mt-2">Secure</p>
                     </div>
-                    <div className="aspect-[4/5] bg-violet-600 rounded-[3rem] p-8 flex flex-col justify-end shadow-2xl shadow-violet-900/40">
-                      <Zap size={40} className="text-white mb-6" />
-                      <h4 className="text-4xl font-display font-black tracking-tighter text-white">24/7</h4>
-                      <p className="text-[10px] font-black uppercase tracking-widest text-white/70 mt-2">Concierge</p>
+                    <div className="aspect-[4/5] bg-violet-600 rounded-[2rem] md:rounded-[3rem] p-6 md:p-8 flex flex-col justify-end shadow-2xl shadow-violet-900/40">
+                      <Zap size={32} md:size={40} className="text-white mb-4 md:mb-6" />
+                      <h4 className="text-3xl md:text-4xl font-display font-black tracking-tighter text-white">24/7</h4>
+                      <p className="text-[9px] md:text-[10px] font-black uppercase tracking-widest text-white/70 mt-1 md:mt-2">Support</p>
                     </div>
                   </div>
                 </div>
               </div>
 
               <div className="order-1 lg:order-2">
-                <h2 className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.4em] mb-8">The Protocol</h2>
-                <h3 className="text-5xl md:text-7xl font-display font-black mb-10 leading-[0.9] tracking-tighter">
-                  ENGINEERING <br />
-                  <span className="text-white/30">FINANCIAL</span> <br />
-                  FREEDOM.
+                <h2 className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.4em] mb-4 md:mb-8">About Us</h2>
+                <h3 className="text-3xl md:text-7xl font-display font-black mb-6 md:mb-10 leading-[1] md:leading-[0.9] tracking-tighter">
+                  YOUR MONEY, <br />
+                  <span className="text-white/30">SECURED.</span>
                 </h3>
-                <p className="text-xl text-white/50 mb-10 leading-relaxed font-medium">
-                  Invest Pro is not just a platform; it's a sophisticated financial ecosystem built on the principles of transparency, security, and algorithmic precision. We leverage high-frequency trading and automated yield farming to deliver returns that were previously reserved for institutional giants.
+                <p className="text-base md:text-xl text-white/50 mb-6 md:mb-10 leading-relaxed font-medium">
+                  Invest Pro is a secure investment platform built for everyone. We use advanced technology to provide consistent daily returns on your investments, ensuring your money works for you.
                 </p>
-                <div className="grid grid-cols-2 gap-8 mb-12">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:gap-8 mb-8 md:mb-12">
                   {[
-                    { title: 'Algorithmic Yield', desc: 'Proprietary AI-driven strategies.' },
-                    { title: 'Real-time Audit', desc: 'Transparent on-chain verification.' },
-                    { title: 'Cold Storage', desc: '98% of assets kept offline.' },
-                    { title: 'Global Access', desc: 'Seamless cross-border capital.' }
+                    { title: 'Daily Returns', desc: 'Consistent profit generation.' },
+                    { title: 'Secure Platform', desc: 'Advanced security systems.' },
+                    { title: 'Safe Storage', desc: 'Your funds are always protected.' },
+                    { title: 'Easy Access', desc: 'Withdraw your profits anytime.' }
                   ].map((item, i) => (
-                    <div key={i} className="space-y-2">
+                    <div key={i} className="space-y-1 md:space-y-2">
                       <div className="flex items-center gap-2">
                         <CheckCircle2 size={14} className="text-indigo-400" />
                         <span className="text-sm font-black tracking-tight">{item.title}</span>
                       </div>
-                      <p className="text-[11px] text-white/30 leading-tight">{item.desc}</p>
+                      <p className="text-[10px] md:text-[11px] text-white/30 leading-tight">{item.desc}</p>
                     </div>
                   ))}
                 </div>
                 <button 
                   onClick={() => scrollToSection('features')}
-                  className="group flex items-center gap-4 text-[11px] font-black uppercase tracking-[0.3em] text-white hover:text-indigo-400 transition-colors"
+                  className="group flex items-center gap-4 text-[10px] md:text-[11px] font-black uppercase tracking-[0.3em] text-white hover:text-indigo-400 transition-colors"
                 >
-                  Deep Dive into Technology <ArrowRight size={20} className="group-hover:translate-x-2 transition-transform" />
+                  Learn More <ArrowRight size={18} md:size={20} className="group-hover:translate-x-2 transition-transform" />
                 </button>
               </div>
             </div>
@@ -352,32 +351,32 @@ export default function Landing() {
         </section>
 
         {/* Features - Hardware Style */}
-        <section id="features" className="py-40 px-6 sm:px-8 lg:px-12 bg-white/5 relative">
+        <section id="features" className="py-20 md:py-40 px-6 sm:px-8 lg:px-12 bg-white/5 relative">
           <div className="max-w-7xl mx-auto">
-            <div className="flex flex-col md:flex-row md:items-end justify-between mb-24 gap-10">
+            <div className="flex flex-col md:flex-row md:items-end justify-between mb-12 md:mb-24 gap-6 md:gap-10">
               <div className="max-w-2xl">
-                <h2 className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.4em] mb-6">Core Infrastructure</h2>
-                <h3 className="text-5xl md:text-6xl font-display font-black tracking-tighter leading-none">BUILT FOR PERFORMANCE.</h3>
+                <h2 className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.4em] mb-4 md:mb-6">Features</h2>
+                <h3 className="text-3xl md:text-6xl font-display font-black tracking-tighter leading-tight md:leading-none">WHY CHOOSE US.</h3>
               </div>
-              <p className="text-lg text-white/40 max-w-sm leading-relaxed">Our infrastructure is designed to handle massive throughput with zero latency.</p>
+              <p className="text-base md:text-lg text-white/40 max-w-sm leading-relaxed">Our platform is built to provide the best investment experience for our users.</p>
             </div>
-
-            <div className="grid md:grid-cols-3 gap-8">
+ 
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
               {[
-                { icon: Shield, title: 'Fortress Security', desc: 'Multi-signature vaults and biometric authentication layers ensure your capital remains untouchable.' },
-                { icon: Zap, title: 'Instant Liquidity', desc: 'Our automated clearing house ensures withdrawals are processed in milliseconds, 24/7/365.' },
-                { icon: TrendingUp, title: 'Dynamic Yields', desc: 'Real-time rebalancing across multiple liquidity pools to capture the highest possible alpha.' }
+                { icon: Shield, title: 'Secure Investing', desc: 'We use the best security measures to keep your investment safe and secure at all times.' },
+                { icon: Zap, title: 'Fast Withdrawals', desc: 'Withdraw your daily profits quickly and easily whenever you want, without any delays.' },
+                { icon: TrendingUp, title: 'Daily Profits', desc: 'Get consistent daily returns on your investment based on the plan you choose.' }
               ].map((feature, i) => (
-                <div key={i} className="group relative p-12 rounded-[3rem] bg-[#0a0a0a] border border-white/5 hover:border-indigo-500/30 transition-all duration-700 overflow-hidden">
+                <div key={i} className="group relative p-8 md:p-12 rounded-[2rem] md:rounded-[3rem] bg-[#0a0a0a] border border-white/5 hover:border-indigo-500/30 transition-all duration-700 overflow-hidden">
                   <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-600/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 group-hover:bg-indigo-600/10 transition-colors"></div>
-                  <div className="w-20 h-20 bg-white/5 rounded-3xl flex items-center justify-center mb-10 text-white group-hover:bg-indigo-600 group-hover:text-white transition-all duration-500 border border-white/10">
-                    <feature.icon size={36} strokeWidth={1.5} />
+                  <div className="w-14 h-14 md:w-20 md:h-20 bg-white/5 rounded-2xl md:rounded-3xl flex items-center justify-center mb-6 md:mb-10 text-white group-hover:bg-indigo-600 group-hover:text-white transition-all duration-500 border border-white/10">
+                    <feature.icon size={28} md:size={36} strokeWidth={1.5} />
                   </div>
-                  <h3 className="text-2xl font-display font-black mb-6 tracking-tight">{feature.title}</h3>
-                  <p className="text-white/40 leading-relaxed text-lg font-medium">{feature.desc}</p>
+                  <h3 className="text-xl md:text-2xl font-display font-black mb-3 md:mb-6 tracking-tight">{feature.title}</h3>
+                  <p className="text-white/40 leading-relaxed text-sm md:text-lg font-medium">{feature.desc}</p>
                   
-                  <div className="mt-10 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
-                    <span className="text-[10px] font-black uppercase tracking-widest text-indigo-400">Explore Module</span>
+                  <div className="mt-6 md:mt-10 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-500">
+                    <span className="text-[10px] font-black uppercase tracking-widest text-indigo-400">Learn More</span>
                     <ArrowRight size={14} className="text-indigo-400" />
                   </div>
                 </div>
@@ -385,66 +384,66 @@ export default function Landing() {
             </div>
           </div>
         </section>
-
+ 
         {/* Plans - Luxury/Prestige Style */}
-        <section id="plans" className="py-40 px-6 sm:px-8 lg:px-12 relative">
+        <section id="plans" className="py-20 md:py-40 px-6 sm:px-8 lg:px-12 relative">
           <div className="max-w-7xl mx-auto">
-            <div className="text-center mb-24">
-              <h2 className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.4em] mb-6">Investment Tiers</h2>
-              <h3 className="text-5xl md:text-7xl font-display font-black tracking-tighter">SELECT YOUR STRATEGY.</h3>
+            <div className="text-center mb-12 md:mb-24">
+              <h2 className="text-[10px] font-black text-indigo-400 uppercase tracking-[0.4em] mb-4 md:mb-6">Our Plans</h2>
+              <h3 className="text-3xl md:text-7xl font-display font-black tracking-tighter">CHOOSE A PLAN.</h3>
             </div>
-
-            <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+ 
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 max-w-6xl mx-auto">
               {[
                 { name: 'Standard', min: 100, daily: '1.5%', total: '145%', duration: 30, color: 'white/5' },
                 { name: 'Premium', min: 500, daily: '2.5%', total: '175%', duration: 30, popular: true, color: 'indigo-600' },
-                { name: 'Elite', min: 1000, daily: '4.0%', total: '220%', duration: 30, color: 'white/5' },
+                { name: 'VIP', min: 1000, daily: '4.0%', total: '220%', duration: 30, color: 'white/5' },
               ].map((plan, i) => (
-                <div key={i} className={`relative p-12 rounded-[3.5rem] border transition-all duration-700 ${plan.popular ? 'bg-indigo-600 border-indigo-500 shadow-[0_40px_80px_-15px_rgba(79,70,229,0.3)] scale-105 z-10' : 'bg-white/5 border-white/10 hover:border-white/20'}`}>
+                <div key={i} className={`relative p-8 md:p-12 rounded-[2rem] md:rounded-[3.5rem] border transition-all duration-700 ${plan.popular ? 'bg-indigo-600 border-indigo-500 shadow-[0_40px_80px_-15px_rgba(79,70,229,0.3)] md:scale-105 z-10' : 'bg-white/5 border-white/10 hover:border-white/20'}`}>
                   {plan.popular && (
-                    <div className="absolute -top-5 left-1/2 -translate-x-1/2 px-6 py-2 bg-white text-indigo-600 text-[10px] font-black uppercase tracking-[0.2em] rounded-full shadow-xl">
+                    <div className="absolute -top-4 md:-top-5 left-1/2 -translate-x-1/2 px-5 md:px-6 py-1.5 md:py-2 bg-white text-indigo-600 text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] rounded-full shadow-xl">
                       Most Selected
                     </div>
                   )}
                   
-                  <div className="mb-12">
-                    <h3 className="text-3xl font-display font-black mb-2 tracking-tighter">{plan.name}</h3>
-                    <p className={`text-[10px] font-black uppercase tracking-widest ${plan.popular ? 'text-white/70' : 'text-white/30'}`}>Tier {i + 1} Protocol</p>
+                  <div className="mb-6 md:mb-12">
+                    <h3 className="text-xl md:text-3xl font-display font-black mb-1 md:mb-2 tracking-tighter">{plan.name}</h3>
+                    <p className={`text-[9px] md:text-[10px] font-black uppercase tracking-widest ${plan.popular ? 'text-white/70' : 'text-white/30'}`}>Plan {i + 1}</p>
                   </div>
-
-                  <div className="flex items-baseline gap-2 mb-12">
-                    <span className="text-6xl font-display font-black tracking-tighter">${plan.min}</span>
-                    <span className={`text-sm font-black uppercase tracking-widest ${plan.popular ? 'text-white/60' : 'text-white/30'}`}>Minimum</span>
+ 
+                  <div className="flex items-baseline gap-2 mb-8 md:mb-12">
+                    <span className="text-4xl md:text-6xl font-display font-black tracking-tighter">${plan.min}</span>
+                    <span className={`text-xs md:text-sm font-black uppercase tracking-widest ${plan.popular ? 'text-white/60' : 'text-white/30'}`}>Minimum</span>
                   </div>
-
-                  <div className="space-y-6 mb-16">
+ 
+                  <div className="space-y-4 md:space-y-6 mb-10 md:mb-16">
                     {[
-                      { label: 'Daily Yield', val: plan.daily },
+                      { label: 'Daily Profit', val: plan.daily },
                       { label: 'Total Return', val: plan.total },
                       { label: 'Duration', val: `${plan.duration} Days` },
-                      { label: 'Compounding', val: 'Enabled' }
+                      { label: 'Withdrawal', val: 'Daily' }
                     ].map((row, idx) => (
                       <div key={idx} className="flex justify-between items-center">
-                        <span className={`text-[11px] font-black uppercase tracking-widest ${plan.popular ? 'text-white/60' : 'text-white/30'}`}>{row.label}</span>
-                        <span className="font-black tracking-tight">{row.val}</span>
+                        <span className={`text-[10px] md:text-[11px] font-black uppercase tracking-widest ${plan.popular ? 'text-white/60' : 'text-white/30'}`}>{row.label}</span>
+                        <span className="font-black text-sm md:text-base tracking-tight">{row.val}</span>
                       </div>
                     ))}
                   </div>
-
+ 
                   <Link 
                     to="/register" 
-                    className={`block w-full py-6 rounded-3xl font-black text-center text-sm uppercase tracking-[0.2em] transition-all ${plan.popular ? 'bg-white text-indigo-600 hover:bg-slate-100' : 'bg-white/10 text-white hover:bg-white/20'}`}
+                    className={`block w-full py-4 md:py-6 rounded-xl md:rounded-3xl font-black text-center text-xs md:text-sm uppercase tracking-[0.2em] transition-all ${plan.popular ? 'bg-white text-indigo-600 hover:bg-slate-100' : 'bg-white/10 text-white hover:bg-white/20'}`}
                   >
-                    Initialize Plan
+                    Invest Now
                   </Link>
                 </div>
               ))}
             </div>
           </div>
         </section>
-
+ 
         {/* CTA Section - Immersive */}
-        <section className="py-40 px-6 sm:px-8 lg:px-12 relative overflow-hidden">
+        <section className="py-20 md:py-40 px-6 sm:px-8 lg:px-12 relative overflow-hidden">
           <div className="absolute inset-0 bg-indigo-600">
             <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/carbon-fibre.png')] opacity-20"></div>
             <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-b from-black/20 to-transparent"></div>
@@ -457,72 +456,120 @@ export default function Landing() {
               viewport={{ once: true }}
               transition={{ duration: 0.8 }}
             >
-              <h2 className="text-5xl md:text-8xl font-display font-black text-white mb-10 leading-[0.9] tracking-tighter">
-                YOUR FUTURE <br />
-                IS WAITING.
+              <h2 className="text-4xl md:text-8xl font-display font-black text-white mb-6 md:mb-10 leading-[1] md:leading-[0.9] tracking-tighter">
+                START EARNING <br />
+                TODAY.
               </h2>
-              <p className="text-xl text-indigo-100/70 mb-16 leading-relaxed max-w-2xl mx-auto font-medium">
-                Join the elite circle of investors who have already unlocked the power of algorithmic wealth generation. Secure your spot in the protocol today.
+              <p className="text-base md:text-xl text-indigo-100/70 mb-10 md:mb-16 leading-relaxed max-w-2xl mx-auto font-medium">
+                Join thousands of investors who are already earning daily profits with our platform. Secure your financial future today.
               </p>
-              <div className="flex flex-col sm:flex-row items-center justify-center gap-8">
-                <Link to="/register" className="w-full sm:w-auto px-16 py-7 bg-white text-black hover:bg-indigo-100 rounded-full font-black text-xl transition-all hover:scale-105 active:scale-95 shadow-[0_20px_50px_rgba(0,0,0,0.3)]">
-                  Create Account
+              <div className="flex flex-col sm:flex-row items-center justify-center gap-4 md:gap-8">
+                <Link to="/register" className="w-full sm:w-auto px-10 md:px-16 py-5 md:py-7 bg-white text-black hover:bg-indigo-100 rounded-full font-black text-lg md:text-xl transition-all hover:scale-105 active:scale-95 shadow-[0_20px_50px_rgba(0,0,0,0.3)]">
+                  Join Now
                 </Link>
-                <Link to="/contact" className="w-full sm:w-auto px-16 py-7 bg-transparent text-white border-2 border-white/30 hover:border-white rounded-full font-black text-xl transition-all">
-                  Contact Desk
+                <Link to="/contact" className="w-full sm:w-auto px-10 md:px-16 py-5 md:py-7 bg-transparent text-white border-2 border-white/30 hover:border-white rounded-full font-black text-lg md:text-xl transition-all">
+                  Contact
                 </Link>
               </div>
             </motion.div>
           </div>
         </section>
       </main>
+ 
+      {/* Contact Section */}
+      <section id="contact" className="py-24 md:py-40 px-6 relative overflow-hidden">
+        <div className="max-w-4xl mx-auto text-center relative z-10">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-500/10 rounded-full border border-indigo-500/20 mb-8"
+          >
+            <Mail size={14} className="text-indigo-400" />
+            <span className="text-[10px] font-black uppercase tracking-widest text-indigo-400">Support</span>
+          </motion.div>
+          <h2 className="text-5xl md:text-7xl font-display font-black tracking-tighter leading-[0.9] mb-8">
+            NEED <span className="text-white/30">HELP?</span> <br />
+            CONTACT US.
+          </h2>
+          <p className="text-lg md:text-xl text-white/40 mb-12 max-w-2xl mx-auto leading-relaxed font-medium">
+            Our support team is available 24/7 to assist you with your investments. Reach out to us anytime.
+          </p>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <a href="mailto:support@investpro.com" className="p-8 bg-white/5 border border-white/10 rounded-[2.5rem] flex flex-col items-center gap-4 hover:bg-white/10 transition-all group">
+              <div className="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Mail size={32} className="text-white" />
+              </div>
+              <h3 className="text-xl font-bold">Email Support</h3>
+              <p className="text-white/40 text-sm">support@investpro.com</p>
+            </a>
+            <a href="https://t.me/InvestProSupport" target="_blank" rel="noopener noreferrer" className="p-8 bg-white/5 border border-white/10 rounded-[2.5rem] flex flex-col items-center gap-4 hover:bg-white/10 transition-all group">
+              <div className="w-16 h-16 bg-indigo-600 rounded-2xl flex items-center justify-center group-hover:scale-110 transition-transform">
+                <Send size={32} className="text-white" />
+              </div>
+              <h3 className="text-xl font-bold">Telegram</h3>
+              <p className="text-white/40 text-sm">@InvestProSupport</p>
+            </a>
+          </div>
+        </div>
+      </section>
 
       {/* Footer */}
-      <footer id="connect" className="bg-[#050505] text-white/40 py-32 px-6 sm:px-8 lg:px-12 border-t border-white/5">
-        <div className="max-w-7xl mx-auto grid md:grid-cols-4 gap-20">
+      <footer id="connect" className="bg-[#050505] text-white/40 py-20 md:py-32 px-6 sm:px-8 lg:px-12 border-t border-white/5">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12 md:gap-20">
           <div className="md:col-span-2">
-            <div className="flex items-center gap-4 mb-10">
-              <div className="w-12 h-12 bg-indigo-600 rounded-2xl flex items-center justify-center shadow-2xl shadow-indigo-900/40">
-                <TrendingUp className="text-white w-7 h-7" />
+            <div className="flex items-center gap-4 mb-6 md:mb-10">
+              <div className="w-10 h-10 md:w-12 md:h-12 bg-indigo-600 rounded-xl md:rounded-2xl flex items-center justify-center shadow-2xl shadow-indigo-900/40">
+                <TrendingUp className="text-white w-6 h-6 md:w-7 md:h-7" />
               </div>
-              <span className="font-display font-black text-3xl text-white tracking-tighter">INVEST PRO</span>
+              <span className="font-display font-black text-2xl md:text-3xl text-white tracking-tighter">INVEST PRO</span>
             </div>
-            <p className="text-lg text-white/30 max-w-md mb-12 leading-relaxed font-medium">
-              The world's most advanced institutional-grade yield protocol. Secure, transparent, and engineered for the next generation of wealth.
+            <p className="text-sm md:text-lg text-white/30 max-w-md mb-8 md:mb-12 leading-relaxed font-medium">
+              The world's most trusted daily return investment platform. Secure, transparent, and built for your growth.
             </p>
-            <div className="flex gap-6">
+            <div className="space-y-4 mb-8">
+              <div className="flex items-center gap-3 text-white/50 hover:text-white transition-colors">
+                <Mail size={18} className="text-indigo-400" />
+                <span className="text-sm font-black tracking-tight">support@investpro.com</span>
+              </div>
+              <div className="flex items-center gap-3 text-white/50 hover:text-white transition-colors">
+                <Send size={18} className="text-indigo-400" />
+                <span className="text-sm font-black tracking-tight">@InvestProSupport</span>
+              </div>
+            </div>
+            <div className="flex gap-4 md:gap-6">
               {[Facebook, Twitter, Instagram, Youtube, Send].map((Icon, i) => (
-                <a key={i} href="#" className="w-14 h-14 rounded-2xl bg-white/5 flex items-center justify-center hover:bg-indigo-600 hover:text-white transition-all duration-500 border border-white/10 group">
-                  <Icon size={24} className="group-hover:scale-110 transition-transform" />
+                <a key={i} href="#" className="w-10 h-10 md:w-14 md:h-14 rounded-xl md:rounded-2xl bg-white/5 flex items-center justify-center hover:bg-indigo-600 hover:text-white transition-all duration-500 border border-white/10 group">
+                  <Icon size={18} md:size={24} className="group-hover:scale-110 transition-transform" />
                 </a>
               ))}
             </div>
           </div>
           
           <div>
-            <h4 className="text-white font-black uppercase tracking-[0.3em] text-[10px] mb-10">Navigation</h4>
-            <ul className="space-y-6 text-sm font-black uppercase tracking-widest">
-              <li><button onClick={() => scrollToSection('home')} className="hover:text-indigo-400 transition-colors">Protocol Home</button></li>
-              <li><button onClick={() => scrollToSection('about')} className="hover:text-indigo-400 transition-colors">Our Thesis</button></li>
-              <li><button onClick={() => scrollToSection('plans')} className="hover:text-indigo-400 transition-colors">Yield Tiers</button></li>
-              <li><button onClick={() => scrollToSection('features')} className="hover:text-indigo-400 transition-colors">Infrastructure</button></li>
+            <h4 className="text-white font-black uppercase tracking-[0.3em] text-[10px] mb-6 md:mb-10">Navigation</h4>
+            <ul className="space-y-3 md:space-y-6 text-xs md:text-sm font-black uppercase tracking-widest">
+              <li><button onClick={() => scrollToSection('home')} className="hover:text-indigo-400 transition-colors">Home</button></li>
+              <li><button onClick={() => scrollToSection('about')} className="hover:text-indigo-400 transition-colors">About Us</button></li>
+              <li><button onClick={() => scrollToSection('plans')} className="hover:text-indigo-400 transition-colors">Plans</button></li>
+              <li><button onClick={() => scrollToSection('features')} className="hover:text-indigo-400 transition-colors">Features</button></li>
             </ul>
           </div>
-
+ 
           <div>
-            <h4 className="text-white font-black uppercase tracking-[0.3em] text-[10px] mb-10">Support</h4>
-            <ul className="space-y-6 text-sm font-black uppercase tracking-widest">
-              <li><Link to="/contact" className="hover:text-indigo-400 transition-colors">Support Desk</Link></li>
-              <li><Link to="/contact" className="hover:text-indigo-400 transition-colors">FAQ / Knowledge</Link></li>
-              <li><Link to="/terms" className="hover:text-indigo-400 transition-colors">Legal Framework</Link></li>
-              <li><Link to="/login" className="hover:text-indigo-400 transition-colors">Terminal Login</Link></li>
+            <h4 className="text-white font-black uppercase tracking-[0.3em] text-[10px] mb-6 md:mb-10">Support</h4>
+            <ul className="space-y-3 md:space-y-6 text-xs md:text-sm font-black uppercase tracking-widest">
+              <li><Link to="/contact" className="hover:text-indigo-400 transition-colors">Support</Link></li>
+              <li><Link to="/contact" className="hover:text-indigo-400 transition-colors">FAQ</Link></li>
+              <li><Link to="/terms" className="hover:text-indigo-400 transition-colors">Terms</Link></li>
+              <li><Link to="/login" className="hover:text-indigo-400 transition-colors">Login</Link></li>
             </ul>
           </div>
         </div>
         
-        <div className="max-w-7xl mx-auto mt-32 pt-12 border-t border-white/5 text-[10px] font-black uppercase tracking-[0.3em] flex flex-col sm:flex-row justify-between items-center gap-8">
-          <p>© 2026 INVEST PRO PROTOCOL. ALL RIGHTS RESERVED.</p>
-          <div className="flex gap-12">
+        <div className="max-w-7xl mx-auto mt-20 md:mt-32 pt-12 border-t border-white/5 text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] flex flex-col sm:flex-row justify-between items-center gap-6 md:gap-8">
+          <p>© 2026 INVEST PRO. ALL RIGHTS RESERVED.</p>
+          <div className="flex gap-8 md:gap-12">
             <a href="#" className="hover:text-white transition-colors">Privacy</a>
             <a href="#" className="hover:text-white transition-colors">Compliance</a>
             <a href="#" className="hover:text-white transition-colors">Security</a>
