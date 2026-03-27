@@ -21,7 +21,31 @@ export default function Login() {
     e.preventDefault();
     setError("");
     if (step === 1 && email) {
-      setStep(2);
+      setLoading(true);
+      try {
+        if (isSupabaseConfigured) {
+          // Check if user exists in the database
+          const { data, error } = await supabase
+            .from('users')
+            .select('email')
+            .eq('email', email)
+            .maybeSingle();
+
+          if (error) throw error;
+
+          if (!data) {
+            setError("Account not found. Please register first.");
+            setLoading(false);
+            return;
+          }
+        }
+        setStep(2);
+      } catch (err: any) {
+        console.error("Error checking email:", err);
+        setError("Error verifying account. Please try again.");
+      } finally {
+        setLoading(false);
+      }
     } else if (step === 2 && password) {
       setLoading(true);
       try {
