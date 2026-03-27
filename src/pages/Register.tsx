@@ -55,8 +55,8 @@ export default function Register() {
         if (authData.user) {
           const myReferralCode = "INV" + Math.floor(10000 + Math.random() * 90000);
           
-          // Create user document
-          const { error: dbError } = await supabase.from('users').insert({
+          // Create user document (using upsert to avoid conflict with trigger)
+          const { error: dbError } = await supabase.from('users').upsert({
             id: authData.user.id,
             full_name: formData.fullName,
             email: formData.email,
@@ -71,6 +71,7 @@ export default function Register() {
             total_withdraw: 0,
             referral_earnings: 0,
             total_referrals: 0,
+            role: "client",
           });
 
           if (dbError) {

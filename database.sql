@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS public.users (
     total_withdraw NUMERIC DEFAULT 0,
     referral_earnings NUMERIC DEFAULT 0,
     total_referrals INTEGER DEFAULT 0,
+    role TEXT DEFAULT 'client',
     profile_image TEXT,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT TIMEZONE('utc'::text, NOW()) NOT NULL
 );
@@ -98,3 +99,29 @@ CREATE POLICY "Users can view their own notifications" ON public.notifications F
 CREATE POLICY "Users can insert their own notifications" ON public.notifications FOR INSERT WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "Users can update their own notifications" ON public.notifications FOR UPDATE USING (auth.uid() = user_id);
 CREATE POLICY "Users can delete their own notifications" ON public.notifications FOR DELETE USING (auth.uid() = user_id);
+
+-- 5. Trigger to create a profile after signup
+CREATE OR REPLACE FUNCTION public.handle_new_user()
+RETURNS TRIGGER AS $$
+BEGIN
+  INSERT INTO public.users (id, email, full_name, referral_code, balance, deposit_balance, role)
+  VALUES (
+    NEW.id,
+    NEW.email,
+    COALESCE(NEW.raw_user_meta_data->>'displayName', NEW.raw_user_meta_data->>'full_name', ''),
+    'INV' || floor(random() * 90000 + 10000)::text,
+    0,
+    0,
+    'client'
+  )
+  ON CONFLICT (id) DO NOTHING;
+  RETURN NEW;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- Drop trigger if exists
+DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
+
+CREATE TRIGGER on_auth_user_created
+  AFTER INSERT ON auth.users
+  FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
